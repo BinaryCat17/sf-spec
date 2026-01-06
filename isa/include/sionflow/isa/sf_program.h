@@ -84,7 +84,7 @@ typedef struct {
 typedef struct {
     uint16_t reg_idx;
     uint16_t flags;      // SF_BINDING_FLAG_*
-    int32_t byte_stride; // Pre-calculated: stride * sizeof(dtype)
+    uint32_t reserved;
 } sf_bin_task_binding;
 
 // A single execution unit within a program (e.g. for a specific Output shape)
