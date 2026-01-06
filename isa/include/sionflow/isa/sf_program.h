@@ -88,7 +88,7 @@ typedef struct {
 } sf_bin_task_binding;
 
 // A single execution unit within a program (e.g. for a specific Output shape)
-typedef struct {
+typedef struct sf_task {
     uint32_t start_inst;
     uint32_t inst_count;
     uint32_t domain_reg; // Index of the register that defines the execution domain (usually an Output)

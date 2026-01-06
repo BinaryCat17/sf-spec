@@ -18,6 +18,9 @@ typedef struct sf_state {
     // Backend-specific prepared execution plan
     void* baked_data;
 
+    // Task-specific pre-calculated linear strides
+    int32_t* task_strides; // [register_count]
+
     // Error flag set by execution contexts.
     // 0 = No Error. Uses sf_exec_error codes.
     sf_atomic_i32  error_code;

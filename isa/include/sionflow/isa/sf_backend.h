@@ -7,6 +7,7 @@
 // Forward declarations
 struct sf_exec_ctx;
 struct sf_program;
+struct sf_task;
 
 /**
  * @brief Backend Interface.
@@ -25,8 +26,7 @@ typedef void (*sf_backend_dispatch_func)(
     const struct sf_program* program,
     sf_state* state,
     const sf_tensor* domain,
-    uint32_t start_inst,
-    uint32_t inst_count
+    const struct sf_task* task
 );
 
 // Bake function to prepare a program for execution (pre-calculates plans, etc.)
