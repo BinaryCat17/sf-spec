@@ -95,6 +95,14 @@
 - [ ] **Data-Driven Validation & Analysis:** Move rank/shape constraints and type promotion rules from manual C code to schema-validated JSON formulas.
 - [ ] **Schema Validation:** Ensure all `.json` metadata files adhere to a strict schema for professional-grade reliability.
 
+### 10.7 Legacy Purge & Structural Refinement
+- [ ] **Data-Driven Optimizer:** Rewrite `sf_pass_fuse.c` to use generated pattern-matching logic from `compiler_spec.json`, removing 100+ lines of manual C-code.
+- [ ] **Template-Only Kernels:** Eliminate the `SF_KERNEL_AUTO` macro in `sf_kernel_utils.h`. Move the hot-loop logic entirely into Jinja2 templates for 100% transparent generated code.
+- [ ] **Unified Validation:** Replace manual `switch/if` chains in `sf_pass_validate.c` with a single loop driven by `sf_op_metadata` (arity, type masks).
+- [ ] **Zero-Boilerplate Manual Kernels:** Refactor complex kernels (`DOT`, `NORMALIZE`) to use generated pointer-arithmetic wrappers, reducing risk of stride errors.
+- [ ] **Metadata Stripping:** Wrap debug metadata (port names, opcode strings) in `sf_opcodes.c` with `#ifndef NDEBUG` to minimize production binary footprint.
+- [ ] **Strict Generation Checks:** Integrate JSON Schema validation into `isa_gen.py` to catch specification errors before the C-compiler runs.
+
 ### 10.2 Modular Dependency Management
 - [x] **vcpkg Integration:** Create official `vcpkg` ports for `sf-spec`, `sf-compiler`, and `sf-runtime`.
 - [x] **Developer Overlay Workflow:** Implement a `vcpkg-overlays/` system to allow seamless local development across repositories without constant re-installation.
