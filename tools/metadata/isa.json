@@ -878,6 +878,21 @@
       ]
     },
     {
+      "id": "MEAN",
+      "name": "Mean",
+      "opcode": "NOOP",
+      "category": "special",
+      "access": "special",
+      "type_rule": "same_as_input",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
       "id": "REDUCE_SUM",
       "name": "ReduceSum",
       "opcode": "SUM",

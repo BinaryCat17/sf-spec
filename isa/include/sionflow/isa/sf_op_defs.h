@@ -43,6 +43,7 @@ typedef enum {
     SF_SHAPE_RESHAPE,       // Shape follows constant value
     SF_SHAPE_SLICE,         // 1D slice
     SF_SHAPE_SCALAR,        // Output is a single value (ndim=0)
+    SF_SHAPE_COUNT
 } sf_shape_rule;
 
 typedef enum {

@@ -1,0 +1,25 @@
+{
+  "manifest": {
+    "groups": [
+      {
+        "id": "window",
+        "key": "window",
+        "fields": [
+          { "id": "title", "key": "title", "type": "string", "default": "SionFlow App", "target": "app_title" },
+          { "id": "width", "key": "width", "type": "uint32", "default": 800, "target": "window_width" },
+          { "id": "height", "key": "height", "type": "uint32", "default": 600, "target": "window_height" },
+          { "id": "vsync", "key": "vsync", "type": "bool", "default": true, "target": "vsync" },
+          { "id": "fullscreen", "key": "fullscreen", "type": "bool", "default": false, "target": "fullscreen" },
+          { "id": "resizable", "key": "resizable", "type": "bool", "default": true, "target": "resizable" }
+        ]
+      },
+      {
+        "id": "runtime",
+        "key": "runtime",
+        "fields": [
+          { "id": "num_threads", "key": "threads", "type": "uint32", "default": 4, "target": "num_threads" }
+        ]
+      }
+    ]
+  }
+}

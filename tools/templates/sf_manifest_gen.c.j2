@@ -1,0 +1,50 @@
+#include <sionflow/compiler/sf_compiler.h>
+#include <sionflow/base/sf_json.h>
+#include <string.h>
+
+/**
+ * SionFlow Manifest Parser
+ * Automatically generated from manifest.json. DO NOT EDIT.
+ */
+
+void sf_ir_parse_window_settings(const sf_json_value* root, sf_graph_ir* out_ir) {
+    if (!root || root->type != SF_JSON_VAL_OBJECT) return;
+
+    // --- Apply Defaults ---
+{%- for group in manifest.groups %}
+  {%- for field in group.fields %}
+    {%- if field.type == 'string' %}
+    strncpy(out_ir->{{ field.target }}, "{{ field.default }}", SF_MAX_TITLE_NAME - 1);
+    {%- elif field.type == 'bool' %}
+    out_ir->{{ field.target }} = {{ '1' if field.default else '0' }};
+    {%- else %}
+    out_ir->{{ field.target }} = {{ field.default }};
+    {%- endif %}
+  {%- endfor %}
+{%- endfor %}
+
+    // --- Parse Groups ---
+{%- for group in manifest.groups %}
+    const sf_json_value* g_{{ group.id }} = sf_json_get_field(root, "{{ group.key }}");
+    if (g_{{ group.id }} && g_{{ group.id }}->type == SF_JSON_VAL_OBJECT) {
+    {%- for field in group.fields %}
+        const sf_json_value* v_{{ field.id }} = sf_json_get_field(g_{{ group.id }}, "{{ field.key }}");
+        if (v_{{ field.id }}) {
+        {%- if field.type == 'string' %}
+            if (v_{{ field.id }}->type == SF_JSON_VAL_STRING) {
+                strncpy(out_ir->{{ field.target }}, v_{{ field.id }}->as.s, SF_MAX_TITLE_NAME - 1);
+            }
+        {%- elif field.type == 'uint32' %}
+            if (v_{{ field.id }}->type == SF_JSON_VAL_NUMBER) {
+                out_ir->{{ field.target }} = (uint32_t)v_{{ field.id }}->as.n;
+            }
+        {%- elif field.type == 'bool' %}
+            if (v_{{ field.id }}->type == SF_JSON_VAL_BOOL) {
+                out_ir->{{ field.target }} = (uint8_t)v_{{ field.id }}->as.b;
+            }
+        {%- endif %}
+        }
+    {%- endfor %}
+    }
+{%- endfor %}
+}

@@ -8,6 +8,8 @@ def main():
     parser = argparse.ArgumentParser(description="SionFlow ISA Code Generator")
     parser.add_argument("--isa", required=True, help="Path to isa.json")
     parser.add_argument("--backend", help="Path to optional backend spec (e.g. cpu_spec.json)")
+    parser.add_argument("--compiler", help="Path to optional compiler spec (e.g. compiler_spec.json)")
+    parser.add_argument("--manifest", help="Path to optional manifest spec (e.g. manifest.json)")
     parser.add_argument("--render", nargs="+", help="Pairs of 'template:output'")
     
     args = parser.parse_args()
@@ -21,8 +23,20 @@ def main():
     if args.backend:
         with open(args.backend, "r") as f:
             backend_data = json.load(f)
+
+    # 3. Load Compiler (Optional)
+    compiler_data = {}
+    if args.compiler:
+        with open(args.compiler, "r") as f:
+            compiler_data = json.load(f)
+
+    # 4. Load Manifest (Optional)
+    manifest_data = {}
+    if args.manifest:
+        with open(args.manifest, "r") as f:
+            manifest_data = json.load(f)
             
-    # 3. Prepare Context
+    # 5. Prepare Context
     ports_by_opcode = {}
     for node in isa_data["nodes"]:
         opcode = node["opcode"]
@@ -39,10 +53,12 @@ def main():
         "type_masks": isa_data["type_masks"],
         "nodes_by_id": {n["id"]: n for n in isa_data["nodes"]},
         "ports_by_opcode": ports_by_opcode,
-        "implementations": backend_data.get("implementations", {})
+        "implementations": backend_data.get("implementations", {}),
+        "compiler": compiler_data,
+        "manifest": manifest_data.get("manifest", {})
     }
     
-    # 4. Initialize Jinja2
+    # 5. Initialize Jinja2
     # We allow templates to be anywhere, so we'll use an absolute path for each
     for pair in args.render:
         tmpl_path, out_path = pair.split(":")

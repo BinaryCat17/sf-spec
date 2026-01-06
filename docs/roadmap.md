@@ -88,20 +88,23 @@
 - [x] **Decoupled ISA Definition (`isa.json`):** Purge all implementation-specific logic (C expressions) from the core specification. It must only define the "Contract".
 - [x] **Backend Implementation Specs (`cpu_spec.json`):** Created backend-specific mapping files in `tools/metadata` that link ISA nodes to concrete implementations.
 - [x] **Template-Based Code Generation (Jinja2):** Replaced brittle X-Macros with robust Python + Jinja2 templates for Opcodes, Metadata, and Kernels.
-- [ ] **Compiler Transformation Spec (`compiler_spec.json`):** Move high-level compiler logic into declarative metadata.
-    - [ ] **Fusion & Lowering:** Define patterns (e.g., `Mul+Add -> FMA`) and macro-node decompositions (e.g., `Mean -> Sum/Size`) in JSON.
-    - [ ] **Mathematical Axioms:** Declare commutativity, associativity, and purity (side-effects) to automate optimizer permutations.
-    - [ ] **Provider Registry:** Map external strings (`host.time`, `host.index.N`) to internal opcodes via aliases.
-- [ ] **Data-Driven Validation & Analysis:** Move rank/shape constraints and type promotion rules from manual C code to schema-validated JSON formulas.
+- [x] **Compiler Transformation Spec (`compiler_spec.json`):** Move high-level compiler logic into declarative metadata.
+    - [x] **Fusion & Lowering:** Define patterns (e.g., `Mul+Add -> FMA`) and macro-node decompositions (e.g., `Mean -> Sum/Size`) in JSON.
+    - [x] **Mathematical Axioms:** Declare commutativity, associativity, and purity (side-effects) to automate optimizer permutations.
+    - [x] **Declarative Pipeline:** Define the sequence and names of compiler passes in JSON, generating a table-driven execution engine.
+    - [x] **Provider Registry:** Map external strings (`host.time`, `host.index.N`) to internal opcodes via aliases.
+- [x] **Data-Driven Validation & Analysis:** Move rank/shape constraints and type promotion rules from manual C code to schema-validated JSON formulas.
+- [x] **Declarative App Manifest:** Define window and runtime settings in `manifest.json`, auto-generating the parser and removing hardcode from `sf_graph_utils.c`.
 - [ ] **Schema Validation:** Ensure all `.json` metadata files adhere to a strict schema for professional-grade reliability.
 
 ### 10.7 Legacy Purge & Structural Refinement
-- [ ] **Data-Driven Optimizer:** Rewrite `sf_pass_fuse.c` to use generated pattern-matching logic from `compiler_spec.json`, removing 100+ lines of manual C-code.
+- [x] **Data-Driven Optimizer:** Rewrite `sf_pass_fuse.c` to use generated pattern-matching logic from `compiler_spec.json`, removing 100+ lines of manual C-code.
 - [ ] **Template-Only Kernels:** Eliminate the `SF_KERNEL_AUTO` macro in `sf_kernel_utils.h`. Move the hot-loop logic entirely into Jinja2 templates for 100% transparent generated code.
-- [ ] **Unified Validation:** Replace manual `switch/if` chains in `sf_pass_validate.c` with a single loop driven by `sf_op_metadata` (arity, type masks).
+- [x] **Unified Validation:** Replace manual `switch/if` chains in `sf_pass_validate.c` with a single loop driven by `sf_op_metadata` (arity, type masks, declarative assertions).
 - [ ] **Zero-Boilerplate Manual Kernels:** Refactor complex kernels (`DOT`, `NORMALIZE`) to use generated pointer-arithmetic wrappers, reducing risk of stride errors.
 - [ ] **Metadata Stripping:** Wrap debug metadata (port names, opcode strings) in `sf_opcodes.c` with `#ifndef NDEBUG` to minimize production binary footprint.
 - [ ] **Strict Generation Checks:** Integrate JSON Schema validation into `isa_gen.py` to catch specification errors before the C-compiler runs.
+- [ ] **DSL-Enhanced Kernels:** Implement a simplified DSL within Jinja2 templates to express complex math (like DOT, NORMALIZE) cleanly, while auto-generating stride logic.
 
 ### 10.2 Modular Dependency Management
 - [x] **vcpkg Integration:** Create official `vcpkg` ports for `sf-spec`, `sf-compiler`, and `sf-runtime`.
