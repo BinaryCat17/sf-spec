@@ -1,0 +1,40 @@
+#ifndef SF_OPCODES_H
+#define SF_OPCODES_H
+
+#include <sionflow/base/sf_types.h>
+
+/**
+ * SionFlow Instruction Set Architecture (Opcodes)
+ * Automatically generated from isa.json. DO NOT EDIT.
+ */
+
+#define SF_OP_LIMIT 1024
+
+typedef enum {
+{%- for name, value in opcodes.items() %}
+    SF_OP_{{ name }} = {{ value }},
+{%- endfor %}
+
+    // Special Markers
+    SF_OP_CORE_BEGIN  = 0,
+    SF_OP_CORE_END    = 255,
+    SF_OP_ARRAY_BEGIN = 256,
+    SF_OP_ARRAY_END   = 511,
+    SF_OP_STATE_BEGIN = 512,
+    SF_OP_STATE_END   = 767,
+} sf_opcode;
+
+typedef enum {
+    SF_NODE_UNKNOWN = 0,
+{%- for node in nodes %}
+    SF_NODE_{{ node.id }},
+{%- endfor %}
+    SF_NODE_COUNT
+} sf_node_type;
+
+#include <sionflow/isa/sf_op_defs.h>
+
+const char* sf_opcode_to_str(u16 opcode);
+const sf_runtime_op_metadata* sf_get_op_metadata(u16 opcode);
+
+#endif // SF_OPCODES_H

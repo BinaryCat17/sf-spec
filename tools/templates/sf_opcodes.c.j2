@@ -1,0 +1,34 @@
+#include <sionflow/isa/sf_opcodes.h>
+#include <sionflow/isa/sf_op_defs.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+/**
+ * SionFlow Opcode Metadata (Runtime)
+ * Automatically generated from isa.json. DO NOT EDIT.
+ */
+
+static const sf_runtime_op_metadata OP_METADATA[SF_OP_LIMIT] = {
+{%- for name, value in opcodes.items() %}
+    [SF_OP_{{ name }}] = { 
+        "{{ name }}", 
+        {
+            {%- set ports = ports_by_opcode.get(name, [None, None, None, None]) -%}
+            {%- for i in range(4) -%}
+                {%- if ports[i] -%}"{{ ports[i] }}"{%- else -%}NULL{%- endif -%}
+                {%- if i < 3 -%}, {% endif -%}
+            {%- endfor -%}
+        } 
+    },
+{%- endfor %}
+};
+
+const char* sf_opcode_to_str(u16 opcode) {
+    if (opcode >= SF_OP_LIMIT || !OP_METADATA[opcode].name) return "UNKNOWN";
+    return OP_METADATA[opcode].name;
+}
+
+const sf_runtime_op_metadata* sf_get_op_metadata(u16 opcode) {
+    if (opcode >= SF_OP_LIMIT || !OP_METADATA[opcode].name) return NULL;
+    return &OP_METADATA[opcode];
+}

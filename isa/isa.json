@@ -6,135 +6,1127 @@
     "summary": "Unified specification for SionFlow dtypes, opcodes, and compiler nodes."
   },
   "dtypes": {
-    "f32":  { "id": 1, "size": 4, "kind": "float" },
-    "i32":  { "id": 2, "size": 4, "kind": "integer" },
-    "u8":   { "id": 3, "size": 1, "kind": "unsigned" }
+    "f32": {
+      "id": 1,
+      "size": 4,
+      "kind": "float"
+    },
+    "i32": {
+      "id": 2,
+      "size": 4,
+      "kind": "integer"
+    },
+    "u8": {
+      "id": 3,
+      "size": 1,
+      "kind": "unsigned"
+    }
   },
   "type_masks": {
-    "f32":     ["f32"],
-    "i32":     ["i32"],
-    "u8":      ["u8"],
-    "numeric": ["f32", "i32"],
-    "logic":   ["u8"],
-    "all":     ["f32", "i32", "u8"]
+    "f32": [
+      "f32"
+    ],
+    "i32": [
+      "i32"
+    ],
+    "u8": [
+      "u8"
+    ],
+    "numeric": [
+      "f32",
+      "i32"
+    ],
+    "logic": [
+      "u8"
+    ],
+    "all": [
+      "f32",
+      "i32",
+      "u8"
+    ]
   },
   "constants": {
     "categories": [
-      { "id": "special",   "summary": "Compiler intrinsic" },
-      { "id": "atomic",    "summary": "Primitive Math/Logic" },
-      { "id": "reduction", "summary": "Data reduction" },
-      { "id": "accel",     "summary": "High-performance accelerators" },
-      { "id": "memory",    "summary": "Layout & Random Access" }
+      {
+        "id": "special",
+        "summary": "Compiler intrinsic"
+      },
+      {
+        "id": "atomic",
+        "summary": "Primitive Math/Logic"
+      },
+      {
+        "id": "reduction",
+        "summary": "Data reduction"
+      },
+      {
+        "id": "accel",
+        "summary": "High-performance accelerators"
+      },
+      {
+        "id": "memory",
+        "summary": "Layout & Random Access"
+      }
     ],
     "strategies": [
-      { "id": "default",         "summary": "Simple parallel execution" },
-      { "id": "reduction",       "summary": "Partial result per thread" },
-      { "id": "two_pass_sync",   "summary": "Two passes with a global barrier" }
+      {
+        "id": "default",
+        "summary": "Simple parallel execution"
+      },
+      {
+        "id": "reduction",
+        "summary": "Partial result per thread"
+      },
+      {
+        "id": "two_pass_sync",
+        "summary": "Two passes with a global barrier"
+      }
     ],
     "type_rules": [
-      { "id": "same_as_input",   "summary": "Output follows s1 dtype" },
-      { "id": "same_as_input_2", "summary": "Output follows s2 dtype" },
-      { "id": "force_f32",       "summary": "Always F32 output" },
-      { "id": "force_u8",        "summary": "Always U8 output" },
-      { "id": "force_i32",       "summary": "Always I32 output" }
+      {
+        "id": "same_as_input",
+        "summary": "Output follows s1 dtype"
+      },
+      {
+        "id": "same_as_input_2",
+        "summary": "Output follows s2 dtype"
+      },
+      {
+        "id": "force_f32",
+        "summary": "Always F32 output"
+      },
+      {
+        "id": "force_u8",
+        "summary": "Always U8 output"
+      },
+      {
+        "id": "force_i32",
+        "summary": "Always I32 output"
+      }
     ],
     "shape_rules": [
-      { "id": "special",         "summary": "Handled individually" },
-      { "id": "same_as_s1",      "summary": "Output shape = s1" },
-      { "id": "same_as_s2",      "summary": "Output shape = s2" },
-      { "id": "broadcast",       "summary": "Broadcast s1, s2, s3" },
-      { "id": "matmul",          "summary": "MatMul rule" },
-      { "id": "transpose",       "summary": "Transpose rule" },
-      { "id": "dot",             "summary": "Dot product rule" },
-      { "id": "join",            "summary": "Join rule" },
-      { "id": "gather",          "summary": "Gather rule" },
-      { "id": "reshape",         "summary": "Reshape rule" },
-      { "id": "slice",           "summary": "Slice rule" },
-      { "id": "scalar",          "summary": "Scalar output" }
+      {
+        "id": "special",
+        "summary": "Handled individually"
+      },
+      {
+        "id": "same_as_s1",
+        "summary": "Output shape = s1"
+      },
+      {
+        "id": "same_as_s2",
+        "summary": "Output shape = s2"
+      },
+      {
+        "id": "broadcast",
+        "summary": "Broadcast s1, s2, s3"
+      },
+      {
+        "id": "matmul",
+        "summary": "MatMul rule"
+      },
+      {
+        "id": "transpose",
+        "summary": "Transpose rule"
+      },
+      {
+        "id": "dot",
+        "summary": "Dot product rule"
+      },
+      {
+        "id": "join",
+        "summary": "Join rule"
+      },
+      {
+        "id": "gather",
+        "summary": "Gather rule"
+      },
+      {
+        "id": "reshape",
+        "summary": "Reshape rule"
+      },
+      {
+        "id": "slice",
+        "summary": "Slice rule"
+      },
+      {
+        "id": "scalar",
+        "summary": "Scalar output"
+      }
     ],
     "access_patterns": [
-      { "id": "linear",          "summary": "1:1 mapping" },
-      { "id": "window",          "summary": "Neighborhood access" },
-      { "id": "random",          "summary": "Indirect access" },
-      { "id": "global",          "summary": "Full buffer access" },
-      { "id": "special",         "summary": "Special access" }
+      {
+        "id": "linear",
+        "summary": "1:1 mapping"
+      },
+      {
+        "id": "window",
+        "summary": "Neighborhood access"
+      },
+      {
+        "id": "random",
+        "summary": "Indirect access"
+      },
+      {
+        "id": "global",
+        "summary": "Full buffer access"
+      },
+      {
+        "id": "special",
+        "summary": "Special access"
+      }
     ]
   },
   "opcodes": {
-    "NOOP": 0, "ADD": 1, "SUB": 2, "MUL": 3, "DIV": 4, 
-    "MIN": 10, "MAX": 11, "ABS": 12, "CLAMP": 13, "STEP": 15,
-    "FLOOR": 20, "CEIL": 21, "SIN": 22, "COS": 23, "ATAN2": 24, "SQRT": 25, "POW": 26, "SUM": 27, "FMA": 29,
-    "MATMUL": 40, "TRANSPOSE": 41, "INVERSE": 42, "DOT": 43, "LENGTH": 44, "NORMALIZE": 45, "JOIN": 46, "MIX": 47, "SMOOTHSTEP": 48,
-    "LESS": 60, "GREATER": 61, "EQUAL": 62, "NEQUAL": 63, "LEQUAL": 64, "GEQUAL": 65,
-    "AND": 80, "OR": 81, "XOR": 82, "NOT": 83,
-    "SELECT": 100, "SIZE": 110,
-    "GATHER": 262, "CUMSUM": 270, "COMPRESS": 280,
-    "COPY": 520, "SLICE": 521, "RESHAPE": 522, 
-    "INDEX_X": 530, "INDEX_Y": 531, "INDEX_Z": 532
+    "NOOP": 0,
+    "ADD": 1,
+    "SUB": 2,
+    "MUL": 3,
+    "DIV": 4,
+    "MIN": 10,
+    "MAX": 11,
+    "ABS": 12,
+    "CLAMP": 13,
+    "STEP": 15,
+    "FLOOR": 20,
+    "CEIL": 21,
+    "SIN": 22,
+    "COS": 23,
+    "ATAN2": 24,
+    "SQRT": 25,
+    "POW": 26,
+    "SUM": 27,
+    "FMA": 29,
+    "MATMUL": 40,
+    "TRANSPOSE": 41,
+    "INVERSE": 42,
+    "DOT": 43,
+    "LENGTH": 44,
+    "NORMALIZE": 45,
+    "JOIN": 46,
+    "MIX": 47,
+    "SMOOTHSTEP": 48,
+    "LESS": 60,
+    "GREATER": 61,
+    "EQUAL": 62,
+    "NEQUAL": 63,
+    "LEQUAL": 64,
+    "GEQUAL": 65,
+    "AND": 80,
+    "OR": 81,
+    "XOR": 82,
+    "NOT": 83,
+    "SELECT": 100,
+    "SIZE": 110,
+    "GATHER": 262,
+    "CUMSUM": 270,
+    "COMPRESS": 280,
+    "COPY": 520,
+    "SLICE": 521,
+    "RESHAPE": 522,
+    "INDEX_X": 530,
+    "INDEX_Y": 531,
+    "INDEX_Z": 532
   },
   "nodes": [
-    { "id": "CONST", "name": "Const", "opcode": "NOOP", "category": "special", "access": "special", "type_rule": "same_as_input", "shape_rule": "special", "inputs": [] },
-    { "id": "INPUT", "name": "Input", "opcode": "NOOP", "category": "special", "access": "special", "type_rule": "same_as_input", "shape_rule": "special", "inputs": [] },
-    { "id": "OUTPUT", "name": "Output", "opcode": "COPY", "category": "special", "access": "linear", "type_rule": "same_as_input", "shape_rule": "special", "inputs": [{ "name": "in", "mask": "all" }] },
-    { "id": "CALL", "name": "Call", "opcode": "NOOP", "category": "special", "access": "special", "type_rule": "same_as_input", "shape_rule": "special", "inputs": [] },
-    { "id": "COPY", "name": "Copy", "opcode": "COPY", "category": "special", "access": "linear", "type_rule": "same_as_input", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "all" }] },
-    
-    { "id": "INDEX_X", "name": "IndexX", "opcode": "INDEX_X", "category": "special", "access": "special", "type_rule": "force_f32", "shape_rule": "special", "inputs": [] },
-    { "id": "INDEX_Y", "name": "IndexY", "opcode": "INDEX_Y", "category": "special", "access": "special", "type_rule": "force_f32", "shape_rule": "special", "inputs": [] },
-    { "id": "INDEX_Z", "name": "IndexZ", "opcode": "INDEX_Z", "category": "special", "access": "special", "type_rule": "force_f32", "shape_rule": "special", "inputs": [] },
-
-    { "id": "ADD", "name": "Add", "opcode": "ADD", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }], "implementations": { "c11": { "expression": "(va + vb)" } } },
-    { "id": "SUB", "name": "Sub", "opcode": "SUB", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }], "implementations": { "c11": { "expression": "(va - vb)" } } },
-    { "id": "MUL", "name": "Mul", "opcode": "MUL", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }], "implementations": { "c11": { "expression": "(va * vb)" } } },
-    { "id": "DIV", "name": "Div", "opcode": "DIV", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }], "implementations": { "c11": { "expression": "(va / vb)" } } },
-    
-    { "id": "ABS", "name": "Abs", "opcode": "ABS", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "numeric" }], "implementations": { "c11": { "expression": "fabsf(va)" } } },
-    { "id": "SIN", "name": "Sin", "opcode": "SIN", "category": "atomic", "access": "linear", "type_rule": "force_f32", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "f32" }], "implementations": { "c11": { "expression": "sinf(va)" } } },
-    { "id": "COS", "name": "Cos", "opcode": "COS", "category": "atomic", "access": "linear", "type_rule": "force_f32", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "f32" }], "implementations": { "c11": { "expression": "cosf(va)" } } },
-    { "id": "SQRT", "name": "Sqrt", "opcode": "SQRT", "category": "atomic", "access": "linear", "type_rule": "force_f32", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "f32" }], "implementations": { "c11": { "expression": "sqrtf(va)" } } },
-    { "id": "FLOOR", "name": "Floor", "opcode": "FLOOR", "category": "atomic", "access": "linear", "type_rule": "force_f32", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "f32" }], "implementations": { "c11": { "expression": "floorf(va)" } } },
-    { "id": "CEIL", "name": "Ceil", "opcode": "CEIL", "category": "atomic", "access": "linear", "type_rule": "force_f32", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "f32" }], "implementations": { "c11": { "expression": "ceilf(va)" } } },
-    
-    { "id": "POW", "name": "Pow", "opcode": "POW", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "base", "mask": "numeric" }, { "name": "exp", "mask": "numeric" }], "implementations": { "c11": { "expression": "powf(va, vb)" } } },
-    { "id": "ATAN2", "name": "Atan2", "opcode": "ATAN2", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "y", "mask": "numeric" }, { "name": "x", "mask": "numeric" }], "implementations": { "c11": { "expression": "atan2f(va, vb)" } } },
-    { "id": "MIN", "name": "Min", "opcode": "MIN", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }], "implementations": { "c11": { "expression": "(va < vb ? va : vb)" } } },
-    { "id": "MAX", "name": "Max", "opcode": "MAX", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }], "implementations": { "c11": { "expression": "(va > vb ? va : vb)" } } },
-    
-    { "id": "FMA", "name": "Fma", "opcode": "FMA", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }, { "name": "c", "mask": "numeric" }], "implementations": { "c11": { "expression": "fmaf(va, vb, vc)" } } },
-    { "id": "CLAMP", "name": "Clamp", "opcode": "CLAMP", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "x", "mask": "numeric" }, { "name": "min", "mask": "numeric" }, { "name": "max", "mask": "numeric" }], "implementations": { "c11": { "expression": "fminf(fmaxf(va, vb), vc)" } } },
-    { "id": "STEP", "name": "Step", "opcode": "STEP", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "edge", "mask": "numeric" }, { "name": "x", "mask": "numeric" }], "implementations": { "c11": { "expression": "(vb < va ? 0.0f : 1.0f)" } } },
-    { "id": "MIX", "name": "Mix", "opcode": "MIX", "category": "atomic", "access": "linear", "type_rule": "force_f32", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "f32" }, { "name": "b", "mask": "f32" }, { "name": "t", "mask": "f32" }], "implementations": { "c11": { "expression": "(va * (1.0f - vc) + vb * vc)" } } },
-    { "id": "SMOOTHSTEP", "name": "SmoothStep", "opcode": "SMOOTHSTEP", "category": "atomic", "access": "linear", "type_rule": "force_f32", "shape_rule": "same_as_s2", "inputs": [{ "name": "edges", "mask": "f32" }, { "name": "x", "mask": "f32" }] },
-    { "id": "SELECT", "name": "Select", "opcode": "SELECT", "category": "atomic", "access": "linear", "type_rule": "same_as_input_2", "shape_rule": "broadcast", "inputs": [{ "name": "cond", "mask": "all" }, { "name": "true", "mask": "all" }, { "name": "false", "mask": "all" }], "implementations": { "c11": { "expression": "(va ? vb : vc)" } } },
-    
-    { "id": "LESS", "name": "Less", "opcode": "LESS", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "all" }, { "name": "b", "mask": "all" }], "implementations": { "c11": { "expression": "(va < vb)" } } },
-    { "id": "GREATER", "name": "Greater", "opcode": "GREATER", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "all" }, { "name": "b", "mask": "all" }], "implementations": { "c11": { "expression": "(va > vb)" } } },
-    { "id": "EQUAL", "name": "Equal", "opcode": "EQUAL", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "all" }, { "name": "b", "mask": "all" }], "implementations": { "c11": { "expression": "(va == vb)" } } },
-    { "id": "NEQUAL", "name": "NotEqual", "opcode": "NEQUAL", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "all" }, { "name": "b", "mask": "all" }], "implementations": { "c11": { "expression": "(va != vb)" } } },
-    { "id": "LEQUAL", "name": "LessEqual", "opcode": "LEQUAL", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "all" }, { "name": "b", "mask": "all" }], "implementations": { "c11": { "expression": "(va <= vb)" } } },
-    { "id": "GEQUAL", "name": "GreaterEqual", "opcode": "GEQUAL", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "all" }, { "name": "b", "mask": "all" }], "implementations": { "c11": { "expression": "(va >= vb)" } } },
-    
-    { "id": "AND", "name": "And", "opcode": "AND", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "logic" }, { "name": "b", "mask": "logic" }], "implementations": { "c11": { "expression": "(va && vb)" } } },
-    { "id": "OR", "name": "Or", "opcode": "OR", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "logic" }, { "name": "b", "mask": "logic" }], "implementations": { "c11": { "expression": "(va || vb)" } } },
-    { "id": "XOR", "name": "Xor", "opcode": "XOR", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "logic" }, { "name": "b", "mask": "logic" }], "implementations": { "c11": { "expression": "((int)va != (int)vb)" } } },
-    { "id": "NOT", "name": "Not", "opcode": "NOT", "category": "atomic", "access": "linear", "type_rule": "force_u8", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "all" }], "implementations": { "c11": { "expression": "(!va)" } } },
-    
-    { "id": "REDUCE_SUM", "name": "ReduceSum", "opcode": "SUM", "category": "reduction", "strategy": "reduction", "access": "global", "type_rule": "same_as_input", "shape_rule": "scalar", "inputs": [{ "name": "in", "mask": "numeric" }] },
-    { "id": "DOT", "name": "Dot", "opcode": "DOT", "category": "reduction", "strategy": "reduction", "access": "window", "type_rule": "force_f32", "shape_rule": "dot", "inputs": [{ "name": "a", "mask": "f32" }, { "name": "b", "mask": "f32" }] },
-    { "id": "LENGTH", "name": "Length", "opcode": "LENGTH", "category": "reduction", "strategy": "reduction", "access": "window", "type_rule": "force_f32", "shape_rule": "dot", "inputs": [{ "name": "in", "mask": "f32" }] },
-    { "id": "SIZE", "name": "Size", "opcode": "SIZE", "category": "reduction", "strategy": "reduction", "access": "global", "type_rule": "force_f32", "shape_rule": "scalar", "inputs": [{ "name": "in", "mask": "all" }] },
-    { "id": "CUMSUM", "name": "CumSum", "opcode": "CUMSUM", "category": "reduction", "strategy": "two_pass_sync", "access": "global", "type_rule": "same_as_input", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "numeric" }] },
-    
-    { "id": "MATMUL", "name": "MatMul", "opcode": "MATMUL", "category": "accel", "access": "window", "type_rule": "same_as_input", "shape_rule": "matmul", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }] },
-    { "id": "INVERSE", "name": "Inverse", "opcode": "INVERSE", "category": "accel", "access": "global", "type_rule": "force_f32", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "f32" }] },
-    
-    { "id": "TRANSPOSE", "name": "Transpose", "opcode": "TRANSPOSE", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "transpose", "inputs": [{ "name": "in", "mask": "all" }] },
-    { "id": "NORMALIZE", "name": "Normalize", "opcode": "NORMALIZE", "category": "memory", "access": "window", "type_rule": "force_f32", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "f32" }] },
-    { "id": "JOIN", "name": "Join", "opcode": "JOIN", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "join", "inputs": [{ "name": "a", "mask": "all" }, { "name": "b", "mask": "all" }, { "name": "c", "mask": "all" }, { "name": "d", "mask": "all" }] },
-        { "id": "GATHER", "name": "Gather", "opcode": "GATHER", "category": "memory", "access": "random", "type_rule": "same_as_input", "shape_rule": "gather", "inputs": [{ "name": "data", "mask": "all" }, { "name": "indices", "mask": "i32" }] },
-        { "id": "COMPRESS", "name": "Filter", "opcode": "COMPRESS", "category": "memory", "access": "random", "type_rule": "same_as_input", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "all" }, { "name": "mask", "mask": "all" }] },
-            { "id": "SLICE", "name": "Slice", "opcode": "SLICE", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "slice", "inputs": [{ "name": "in", "mask": "all" }, { "name": "range", "mask": "all" }] },
-            { "id": "RESHAPE", "name": "Reshape", "opcode": "RESHAPE", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "reshape", "inputs": [{ "name": "in", "mask": "all" }, { "name": "shape", "mask": "all" }] }
-          ]
+    {
+      "id": "CONST",
+      "name": "Const",
+      "opcode": "NOOP",
+      "category": "special",
+      "access": "special",
+      "type_rule": "same_as_input",
+      "shape_rule": "special",
+      "inputs": []
+    },
+    {
+      "id": "INPUT",
+      "name": "Input",
+      "opcode": "NOOP",
+      "category": "special",
+      "access": "special",
+      "type_rule": "same_as_input",
+      "shape_rule": "special",
+      "inputs": []
+    },
+    {
+      "id": "OUTPUT",
+      "name": "Output",
+      "opcode": "COPY",
+      "category": "special",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "special",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "all"
         }
-        
+      ]
+    },
+    {
+      "id": "CALL",
+      "name": "Call",
+      "opcode": "NOOP",
+      "category": "special",
+      "access": "special",
+      "type_rule": "same_as_input",
+      "shape_rule": "special",
+      "inputs": []
+    },
+    {
+      "id": "COPY",
+      "name": "Copy",
+      "opcode": "COPY",
+      "category": "special",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "INDEX_X",
+      "name": "IndexX",
+      "opcode": "INDEX_X",
+      "category": "special",
+      "access": "special",
+      "type_rule": "force_f32",
+      "shape_rule": "special",
+      "inputs": []
+    },
+    {
+      "id": "INDEX_Y",
+      "name": "IndexY",
+      "opcode": "INDEX_Y",
+      "category": "special",
+      "access": "special",
+      "type_rule": "force_f32",
+      "shape_rule": "special",
+      "inputs": []
+    },
+    {
+      "id": "INDEX_Z",
+      "name": "IndexZ",
+      "opcode": "INDEX_Z",
+      "category": "special",
+      "access": "special",
+      "type_rule": "force_f32",
+      "shape_rule": "special",
+      "inputs": []
+    },
+    {
+      "id": "ADD",
+      "name": "Add",
+      "opcode": "ADD",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "numeric"
+        },
+        {
+          "name": "b",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "SUB",
+      "name": "Sub",
+      "opcode": "SUB",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "numeric"
+        },
+        {
+          "name": "b",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "MUL",
+      "name": "Mul",
+      "opcode": "MUL",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "numeric"
+        },
+        {
+          "name": "b",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "DIV",
+      "name": "Div",
+      "opcode": "DIV",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "numeric"
+        },
+        {
+          "name": "b",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "ABS",
+      "name": "Abs",
+      "opcode": "ABS",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "SIN",
+      "name": "Sin",
+      "opcode": "SIN",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_f32",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "COS",
+      "name": "Cos",
+      "opcode": "COS",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_f32",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "SQRT",
+      "name": "Sqrt",
+      "opcode": "SQRT",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_f32",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "FLOOR",
+      "name": "Floor",
+      "opcode": "FLOOR",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_f32",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "CEIL",
+      "name": "Ceil",
+      "opcode": "CEIL",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_f32",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "POW",
+      "name": "Pow",
+      "opcode": "POW",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "base",
+          "mask": "numeric"
+        },
+        {
+          "name": "exp",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "ATAN2",
+      "name": "Atan2",
+      "opcode": "ATAN2",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "y",
+          "mask": "numeric"
+        },
+        {
+          "name": "x",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "MIN",
+      "name": "Min",
+      "opcode": "MIN",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "numeric"
+        },
+        {
+          "name": "b",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "MAX",
+      "name": "Max",
+      "opcode": "MAX",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "numeric"
+        },
+        {
+          "name": "b",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "FMA",
+      "name": "Fma",
+      "opcode": "FMA",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "numeric"
+        },
+        {
+          "name": "b",
+          "mask": "numeric"
+        },
+        {
+          "name": "c",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "CLAMP",
+      "name": "Clamp",
+      "opcode": "CLAMP",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "x",
+          "mask": "numeric"
+        },
+        {
+          "name": "min",
+          "mask": "numeric"
+        },
+        {
+          "name": "max",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "STEP",
+      "name": "Step",
+      "opcode": "STEP",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "edge",
+          "mask": "numeric"
+        },
+        {
+          "name": "x",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "MIX",
+      "name": "Mix",
+      "opcode": "MIX",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_f32",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "f32"
+        },
+        {
+          "name": "b",
+          "mask": "f32"
+        },
+        {
+          "name": "t",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "SMOOTHSTEP",
+      "name": "SmoothStep",
+      "opcode": "SMOOTHSTEP",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_f32",
+      "shape_rule": "same_as_s2",
+      "inputs": [
+        {
+          "name": "edges",
+          "mask": "f32"
+        },
+        {
+          "name": "x",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "SELECT",
+      "name": "Select",
+      "opcode": "SELECT",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input_2",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "cond",
+          "mask": "all"
+        },
+        {
+          "name": "true",
+          "mask": "all"
+        },
+        {
+          "name": "false",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "LESS",
+      "name": "Less",
+      "opcode": "LESS",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "all"
+        },
+        {
+          "name": "b",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "GREATER",
+      "name": "Greater",
+      "opcode": "GREATER",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "all"
+        },
+        {
+          "name": "b",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "EQUAL",
+      "name": "Equal",
+      "opcode": "EQUAL",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "all"
+        },
+        {
+          "name": "b",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "NEQUAL",
+      "name": "NotEqual",
+      "opcode": "NEQUAL",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "all"
+        },
+        {
+          "name": "b",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "LEQUAL",
+      "name": "LessEqual",
+      "opcode": "LEQUAL",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "all"
+        },
+        {
+          "name": "b",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "GEQUAL",
+      "name": "GreaterEqual",
+      "opcode": "GEQUAL",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "all"
+        },
+        {
+          "name": "b",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "AND",
+      "name": "And",
+      "opcode": "AND",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "logic"
+        },
+        {
+          "name": "b",
+          "mask": "logic"
+        }
+      ]
+    },
+    {
+      "id": "OR",
+      "name": "Or",
+      "opcode": "OR",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "logic"
+        },
+        {
+          "name": "b",
+          "mask": "logic"
+        }
+      ]
+    },
+    {
+      "id": "XOR",
+      "name": "Xor",
+      "opcode": "XOR",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "broadcast",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "logic"
+        },
+        {
+          "name": "b",
+          "mask": "logic"
+        }
+      ]
+    },
+    {
+      "id": "NOT",
+      "name": "Not",
+      "opcode": "NOT",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "force_u8",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "REDUCE_SUM",
+      "name": "ReduceSum",
+      "opcode": "SUM",
+      "category": "reduction",
+      "strategy": "reduction",
+      "access": "global",
+      "type_rule": "same_as_input",
+      "shape_rule": "scalar",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "DOT",
+      "name": "Dot",
+      "opcode": "DOT",
+      "category": "reduction",
+      "strategy": "reduction",
+      "access": "window",
+      "type_rule": "force_f32",
+      "shape_rule": "dot",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "f32"
+        },
+        {
+          "name": "b",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "LENGTH",
+      "name": "Length",
+      "opcode": "LENGTH",
+      "category": "reduction",
+      "strategy": "reduction",
+      "access": "window",
+      "type_rule": "force_f32",
+      "shape_rule": "dot",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "SIZE",
+      "name": "Size",
+      "opcode": "SIZE",
+      "category": "reduction",
+      "strategy": "reduction",
+      "access": "global",
+      "type_rule": "force_f32",
+      "shape_rule": "scalar",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "CUMSUM",
+      "name": "CumSum",
+      "opcode": "CUMSUM",
+      "category": "reduction",
+      "strategy": "two_pass_sync",
+      "access": "global",
+      "type_rule": "same_as_input",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "MATMUL",
+      "name": "MatMul",
+      "opcode": "MATMUL",
+      "category": "accel",
+      "access": "window",
+      "type_rule": "same_as_input",
+      "shape_rule": "matmul",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "numeric"
+        },
+        {
+          "name": "b",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "INVERSE",
+      "name": "Inverse",
+      "opcode": "INVERSE",
+      "category": "accel",
+      "access": "global",
+      "type_rule": "force_f32",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "TRANSPOSE",
+      "name": "Transpose",
+      "opcode": "TRANSPOSE",
+      "category": "memory",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "transpose",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "NORMALIZE",
+      "name": "Normalize",
+      "opcode": "NORMALIZE",
+      "category": "memory",
+      "access": "window",
+      "type_rule": "force_f32",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "f32"
+        }
+      ]
+    },
+    {
+      "id": "JOIN",
+      "name": "Join",
+      "opcode": "JOIN",
+      "category": "memory",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "join",
+      "inputs": [
+        {
+          "name": "a",
+          "mask": "all"
+        },
+        {
+          "name": "b",
+          "mask": "all"
+        },
+        {
+          "name": "c",
+          "mask": "all"
+        },
+        {
+          "name": "d",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "GATHER",
+      "name": "Gather",
+      "opcode": "GATHER",
+      "category": "memory",
+      "access": "random",
+      "type_rule": "same_as_input",
+      "shape_rule": "gather",
+      "inputs": [
+        {
+          "name": "data",
+          "mask": "all"
+        },
+        {
+          "name": "indices",
+          "mask": "i32"
+        }
+      ]
+    },
+    {
+      "id": "COMPRESS",
+      "name": "Filter",
+      "opcode": "COMPRESS",
+      "category": "memory",
+      "access": "random",
+      "type_rule": "same_as_input",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "all"
+        },
+        {
+          "name": "mask",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "SLICE",
+      "name": "Slice",
+      "opcode": "SLICE",
+      "category": "memory",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "slice",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "all"
+        },
+        {
+          "name": "range",
+          "mask": "all"
+        }
+      ]
+    },
+    {
+      "id": "RESHAPE",
+      "name": "Reshape",
+      "opcode": "RESHAPE",
+      "category": "memory",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "reshape",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "all"
+        },
+        {
+          "name": "shape",
+          "mask": "all"
+        }
+      ]
+    }
+  ]
+}

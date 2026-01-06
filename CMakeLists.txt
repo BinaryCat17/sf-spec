@@ -8,19 +8,24 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 find_package(Python3 REQUIRED)
 
 set(ISA_JSON "${CMAKE_CURRENT_SOURCE_DIR}/isa/isa.json")
-set(GEN_INC "${CMAKE_CURRENT_SOURCE_DIR}/generated/include/sionflow/isa/sf_ops_db.inc")
 set(ISA_GEN_PY "${CMAKE_CURRENT_SOURCE_DIR}/tools/isa_gen.py")
+set(GEN_H "${CMAKE_CURRENT_SOURCE_DIR}/tools/generated/include/sionflow/isa/sf_opcodes.h")
+set(GEN_C "${CMAKE_CURRENT_SOURCE_DIR}/tools/generated/src/sf_opcodes.c")
 
 add_custom_command(
-    OUTPUT "${GEN_INC}"
-    COMMAND Python3::Interpreter "${ISA_GEN_PY}" "${ISA_JSON}" "${GEN_INC}"
-    DEPENDS "${ISA_JSON}" "${ISA_GEN_PY}"
-    COMMENT "Generating SionFlow ISA headers from ${ISA_JSON}"
+    OUTPUT "${GEN_H}" "${GEN_C}"
+    COMMAND Python3::Interpreter "${ISA_GEN_PY}" --isa "${ISA_JSON}" 
+            --render "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.h.j2:${GEN_H}"
+                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.c.j2:${GEN_C}"
+    DEPENDS "${ISA_JSON}" "${ISA_GEN_PY}" 
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.h.j2"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.c.j2"
+    COMMENT "Generating SionFlow ISA (Headers & Metadata)"
     VERBATIM
 )
 
 # Dummy target to force generation before other libraries
-add_custom_target(isa_gen DEPENDS "${GEN_INC}")
+add_custom_target(isa_gen DEPENDS "${GEN_H}" "${GEN_C}")
 
 # Modules
 add_subdirectory(base)
@@ -46,7 +51,7 @@ install(TARGETS base isa
 # Install headers
 install(DIRECTORY base/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY isa/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(DIRECTORY generated/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY tools/generated/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Generate and install the export file
 install(EXPORT SionFlowSpecTargets
