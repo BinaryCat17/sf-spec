@@ -138,15 +138,18 @@ typedef struct {
     sf_lexer lexer;
     sf_token peek;
     sf_arena* arena;
+    bool failed;
 } sf_parser;
 
 static void advance(sf_parser* p) {
+    if (p->failed) return;
     p->peek = next_token(&p->lexer);
 }
 
 static sf_json_value* parse_value(sf_parser* p);
 
 static sf_json_value* parse_object(sf_parser* p) {
+    if (p->failed) return NULL;
     sf_json_value* v = SF_ARENA_PUSH(p->arena, sf_json_value, 1);
     v->type = SF_JSON_VAL_OBJECT;
     v->loc = p->peek.loc;
@@ -163,10 +166,11 @@ static sf_json_value* parse_object(sf_parser* p) {
     Field* tail = NULL;
     size_t count = 0;
 
-    while (p->peek.type != TOK_RBRACE && p->peek.type != TOK_EOF) {
+    while (p->peek.type != TOK_RBRACE && p->peek.type != TOK_EOF && !p->failed) {
         if (p->peek.type != TOK_STRING) {
             SF_LOG_ERROR("Expected string key at %u:%u", p->peek.loc.line, p->peek.loc.column);
-            return v;
+            p->failed = true;
+            return NULL;
         }
         
         char* key = sf_arena_alloc((sf_allocator*)p->arena, p->peek.length + 1);
@@ -176,11 +180,13 @@ static sf_json_value* parse_object(sf_parser* p) {
         
         if (p->peek.type != TOK_COLON) {
             SF_LOG_ERROR("Expected ':' after key at %u:%u", p->peek.loc.line, p->peek.loc.column);
-            return v;
+            p->failed = true;
+            return NULL;
         }
         advance(p);
         
         sf_json_value* val = parse_value(p);
+        if (!val) { p->failed = true; return NULL; }
         
         Field* f = SF_ARENA_PUSH(p->arena, Field, 1);
         f->key = key;
@@ -191,13 +197,22 @@ static sf_json_value* parse_object(sf_parser* p) {
         tail = f;
         count++;
         
-        if (p->peek.type == TOK_COMMA) advance(p);
+        if (p->peek.type == TOK_COMMA) {
+            advance(p);
+            if (p->peek.type == TOK_RBRACE) {
+                SF_LOG_ERROR("Trailing comma in object at %u:%u", p->peek.loc.line, p->peek.loc.column);
+                p->failed = true;
+                return NULL;
+            }
+        }
         else if (p->peek.type != TOK_RBRACE) {
             SF_LOG_ERROR("Expected ',' or '}' at %u:%u", p->peek.loc.line, p->peek.loc.column);
+            p->failed = true;
             break;
         }
     }
     
+    if (p->failed) return NULL;
     if (p->peek.type == TOK_RBRACE) advance(p);
     
     v->as.object.count = count;
@@ -215,6 +230,7 @@ static sf_json_value* parse_object(sf_parser* p) {
 }
 
 static sf_json_value* parse_array(sf_parser* p) {
+    if (p->failed) return NULL;
     sf_json_value* v = SF_ARENA_PUSH(p->arena, sf_json_value, 1);
     v->type = SF_JSON_VAL_ARRAY;
     v->loc = p->peek.loc;
@@ -230,8 +246,9 @@ static sf_json_value* parse_array(sf_parser* p) {
     Item* tail = NULL;
     size_t count = 0;
     
-    while (p->peek.type != TOK_RBRACKET && p->peek.type != TOK_EOF) {
+    while (p->peek.type != TOK_RBRACKET && p->peek.type != TOK_EOF && !p->failed) {
         sf_json_value* val = parse_value(p);
+        if (!val) { p->failed = true; return NULL; }
         
         Item* it = SF_ARENA_PUSH(p->arena, Item, 1);
         it->val = val;
@@ -241,13 +258,22 @@ static sf_json_value* parse_array(sf_parser* p) {
         tail = it;
         count++;
         
-        if (p->peek.type == TOK_COMMA) advance(p);
+        if (p->peek.type == TOK_COMMA) {
+            advance(p);
+            if (p->peek.type == TOK_RBRACKET) {
+                SF_LOG_ERROR("Trailing comma in array at %u:%u", p->peek.loc.line, p->peek.loc.column);
+                p->failed = true;
+                return NULL;
+            }
+        }
         else if (p->peek.type != TOK_RBRACKET) {
             SF_LOG_ERROR("Expected ',' or ']' at %u:%u", p->peek.loc.line, p->peek.loc.column);
+            p->failed = true;
             break;
         }
     }
     
+    if (p->failed) return NULL;
     if (p->peek.type == TOK_RBRACKET) advance(p);
     
     v->as.array.count = count;
@@ -262,6 +288,7 @@ static sf_json_value* parse_array(sf_parser* p) {
 }
 
 static sf_json_value* parse_value(sf_parser* p) {
+    if (p->failed) return NULL;
     sf_json_value* v = NULL;
     switch (p->peek.type) {
         case TOK_LBRACE: return parse_object(p);
