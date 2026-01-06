@@ -4,7 +4,7 @@ import os
 # Configuration
 ISA_JSON_PATH = "sf-spec/isa/isa.json"
 OUTPUT_INC_PATH = "sf-spec/generated/include/sionflow/isa/sf_ops_db.inc"
-OUTPUT_BUILTINS_PATH = "sf-spec/generated/include/sionflow/base/sf_builtins.inc"
+OUTPUT_BUILTINS_PATH = "sf-spec/generated/include/sionflow/isa/sf_builtins.inc"
 
 def generate_ops_db(data):
     S = chr(92)

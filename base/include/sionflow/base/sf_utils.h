@@ -25,9 +25,6 @@ const char* sf_path_get_ext(const char* path);
 // Join directory and file (handling separators)
 char* sf_path_join(const char* dir, const char* file, sf_arena* arena);
 
-// Parse provider string (e.g. "host.index.0") into builtin ID and axis
-void sf_provider_parse(const char* provider, u16* out_builtin_id, u8* out_builtin_axis);
-
 // Check if file exists
 bool sf_file_exists(const char* path);
 

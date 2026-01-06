@@ -1,6 +1,7 @@
 add_library(isa STATIC
     src/sf_tensor.c
     src/sf_opcodes.c
+    src/sf_builtins.c
 )
 add_library(SionFlow::isa ALIAS isa)
 
