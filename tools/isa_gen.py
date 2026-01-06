@@ -1,12 +1,13 @@
 import json
 import os
+import sys
 
-# Configuration
-ISA_JSON_PATH = "sf-spec/isa/isa.json"
-OUTPUT_INC_PATH = "sf-spec/generated/include/sionflow/isa/sf_ops_db.inc"
-OUTPUT_BUILTINS_PATH = "sf-spec/generated/include/sionflow/isa/sf_builtins.inc"
+# Default paths relative to script location
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_ISA_JSON = os.path.join(SCRIPT_DIR, "..", "isa", "isa.json")
+DEFAULT_OUTPUT_INC = os.path.join(SCRIPT_DIR, "..", "generated", "include", "sionflow", "isa", "sf_ops_db.inc")
 
-def generate_ops_db(data):
+def generate_ops_db(data, output_path):
     S = chr(92)
     lines = []
     lines.append("#ifndef SF_OPS_DB_INC")
@@ -74,43 +75,20 @@ def generate_ops_db(data):
 
     lines.append("")
     lines.append("#endif // SF_OPS_DB_INC")
-    return "\n".join(lines)
-
-def generate_builtins(data):
-    S = chr(92)
-    lines = []
-    lines.append("/**")
-    lines.append(" * Automatically generated from isa.json. DO NOT EDIT.")
-    lines.append(" */")
-    lines.append("")
     
-    # 1. Builtin Enum List
-    lines.append(f"#define SF_BUILTIN_LIST {S}")
-    lines.append(f'    SF_BUILTIN(NONE, "none") {S}')
-    
-    providers = data.get("providers", [])
-    for i, p in enumerate(providers):
-        suffix = p["id"].upper()
-        name = p["name"]
-        comma = f" {S}" if i < len(providers) - 1 else ""
-        lines.append(f'    SF_BUILTIN({suffix: <8}, "{name}"){comma}')
-    
-    lines.append("")
-    return "\n".join(lines)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w") as f:
+        f.write("\n".join(lines))
 
 def main():
-    with open(ISA_JSON_PATH, "r") as f:
+    isa_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_ISA_JSON
+    out_path = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_OUTPUT_INC
+    
+    with open(isa_path, "r") as f:
         data = json.load(f)
         
-    # Generate Operations DB
-    with open(OUTPUT_INC_PATH, "w") as f:
-        f.write(generate_ops_db(data))
-        
-    # Generate Builtins DB
-    with open(OUTPUT_BUILTINS_PATH, "w") as f:
-        f.write(generate_builtins(data))
-        
-    print(f"Successfully generated headers from {ISA_JSON_PATH}")
+    generate_ops_db(data, out_path)
+    print(f"Successfully generated {out_path} from {isa_path}")
 
 if __name__ == "__main__":
     main()

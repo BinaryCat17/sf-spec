@@ -69,7 +69,8 @@
     "AND": 80, "OR": 81, "XOR": 82, "NOT": 83,
     "SELECT": 100, "SIZE": 110,
     "GATHER": 262, "CUMSUM": 270, "COMPRESS": 280,
-    "COPY": 520, "SLICE": 521, "RESHAPE": 522
+    "COPY": 520, "SLICE": 521, "RESHAPE": 522, 
+    "INDEX_X": 530, "INDEX_Y": 531, "INDEX_Z": 532
   },
   "nodes": [
     { "id": "CONST", "name": "Const", "opcode": "NOOP", "category": "special", "access": "special", "type_rule": "same_as_input", "shape_rule": "special", "inputs": [] },
@@ -78,6 +79,10 @@
     { "id": "CALL", "name": "Call", "opcode": "NOOP", "category": "special", "access": "special", "type_rule": "same_as_input", "shape_rule": "special", "inputs": [] },
     { "id": "COPY", "name": "Copy", "opcode": "COPY", "category": "special", "access": "linear", "type_rule": "same_as_input", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "all" }] },
     
+    { "id": "INDEX_X", "name": "IndexX", "opcode": "INDEX_X", "category": "special", "access": "special", "type_rule": "force_f32", "shape_rule": "special", "inputs": [] },
+    { "id": "INDEX_Y", "name": "IndexY", "opcode": "INDEX_Y", "category": "special", "access": "special", "type_rule": "force_f32", "shape_rule": "special", "inputs": [] },
+    { "id": "INDEX_Z", "name": "IndexZ", "opcode": "INDEX_Z", "category": "special", "access": "special", "type_rule": "force_f32", "shape_rule": "special", "inputs": [] },
+
     { "id": "ADD", "name": "Add", "opcode": "ADD", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }], "implementations": { "c11": { "expression": "(va + vb)" } } },
     { "id": "SUB", "name": "Sub", "opcode": "SUB", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }], "implementations": { "c11": { "expression": "(va - vb)" } } },
     { "id": "MUL", "name": "Mul", "opcode": "MUL", "category": "atomic", "access": "linear", "type_rule": "same_as_input", "shape_rule": "broadcast", "inputs": [{ "name": "a", "mask": "numeric" }, { "name": "b", "mask": "numeric" }], "implementations": { "c11": { "expression": "(va * vb)" } } },
@@ -126,12 +131,10 @@
     { "id": "TRANSPOSE", "name": "Transpose", "opcode": "TRANSPOSE", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "transpose", "inputs": [{ "name": "in", "mask": "all" }] },
     { "id": "NORMALIZE", "name": "Normalize", "opcode": "NORMALIZE", "category": "memory", "access": "window", "type_rule": "force_f32", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "f32" }] },
     { "id": "JOIN", "name": "Join", "opcode": "JOIN", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "join", "inputs": [{ "name": "a", "mask": "all" }, { "name": "b", "mask": "all" }, { "name": "c", "mask": "all" }, { "name": "d", "mask": "all" }] },
-    { "id": "GATHER", "name": "Gather", "opcode": "GATHER", "category": "memory", "access": "random", "type_rule": "same_as_input", "shape_rule": "gather", "inputs": [{ "name": "data", "mask": "all" }, { "name": "indices", "mask": "i32" }] },
-    { "id": "COMPRESS", "name": "Filter", "opcode": "COMPRESS", "category": "memory", "access": "random", "type_rule": "same_as_input", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "all" }, { "name": "mask", "mask": "all" }] },
-    { "id": "SLICE", "name": "Slice", "opcode": "SLICE", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "slice", "inputs": [{ "name": "in", "mask": "all" }, { "name": "range", "mask": "all" }] },
-    { "id": "RESHAPE", "name": "Reshape", "opcode": "RESHAPE", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "reshape", "inputs": [{ "name": "in", "mask": "all" }, { "name": "shape", "mask": "all" }] }
-  ],
-  "providers": [
-    { "id": "INDEX", "name": "host.index", "opcode": 1, "summary": "Spatial iteration index." }
-  ]
-}
+        { "id": "GATHER", "name": "Gather", "opcode": "GATHER", "category": "memory", "access": "random", "type_rule": "same_as_input", "shape_rule": "gather", "inputs": [{ "name": "data", "mask": "all" }, { "name": "indices", "mask": "i32" }] },
+        { "id": "COMPRESS", "name": "Filter", "opcode": "COMPRESS", "category": "memory", "access": "random", "type_rule": "same_as_input", "shape_rule": "same_as_s1", "inputs": [{ "name": "in", "mask": "all" }, { "name": "mask", "mask": "all" }] },
+            { "id": "SLICE", "name": "Slice", "opcode": "SLICE", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "slice", "inputs": [{ "name": "in", "mask": "all" }, { "name": "range", "mask": "all" }] },
+            { "id": "RESHAPE", "name": "Reshape", "opcode": "RESHAPE", "category": "memory", "access": "linear", "type_rule": "same_as_input", "shape_rule": "reshape", "inputs": [{ "name": "in", "mask": "all" }, { "name": "shape", "mask": "all" }] }
+          ]
+        }
+        

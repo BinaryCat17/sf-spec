@@ -4,9 +4,30 @@ project(sf-spec LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# --- ISA Generation ---
+find_package(Python3 REQUIRED)
+
+set(ISA_JSON "${CMAKE_CURRENT_SOURCE_DIR}/isa/isa.json")
+set(GEN_INC "${CMAKE_CURRENT_SOURCE_DIR}/generated/include/sionflow/isa/sf_ops_db.inc")
+set(ISA_GEN_PY "${CMAKE_CURRENT_SOURCE_DIR}/tools/isa_gen.py")
+
+add_custom_command(
+    OUTPUT "${GEN_INC}"
+    COMMAND Python3::Interpreter "${ISA_GEN_PY}" "${ISA_JSON}" "${GEN_INC}"
+    DEPENDS "${ISA_JSON}" "${ISA_GEN_PY}"
+    COMMENT "Generating SionFlow ISA headers from ${ISA_JSON}"
+    VERBATIM
+)
+
+# Dummy target to force generation before other libraries
+add_custom_target(isa_gen DEPENDS "${GEN_INC}")
+
 # Modules
 add_subdirectory(base)
 add_subdirectory(isa)
+
+add_dependencies(base isa_gen)
+add_dependencies(isa isa_gen)
 
 # --- Installation & Export ---
 

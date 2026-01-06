@@ -1,6 +1,6 @@
 {
   "name": "sf-spec",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Specification and base libraries for SionFlow",
   "dependencies": [
     {
