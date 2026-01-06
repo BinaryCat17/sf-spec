@@ -104,10 +104,8 @@ typedef struct {
     uint8_t dtype;       // sf_dtype
     uint8_t ndim;        // Rank
     uint8_t is_constant; // 1 if data follows, 0 if uninitialized buffer
-    uint8_t builtin_id;  // sf_builtin_id (0 if none)
-    uint8_t builtin_axis; // Axis for indexed providers (e.g. host.index.N)
     uint8_t flags;       // SF_TENSOR_FLAG_*
-    uint8_t reserved[2]; // Padding
+    uint8_t reserved[4]; // Padding
     
     int32_t shape[SF_MAX_DIMS];
     
@@ -138,8 +136,6 @@ typedef struct sf_program {
     sf_type_info* tensor_infos;
     void** tensor_data;
     
-    uint8_t* builtin_ids;  // Array of sf_builtin_id per tensor
-    uint8_t* builtin_axes; // Array of builtin axis per tensor
     uint8_t* tensor_flags; // Array of tensor flags
 
     sf_bin_symbol* symbols;
