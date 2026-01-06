@@ -85,14 +85,15 @@
 **Goal:** Transform SionFlow into a professional, multi-repo ecosystem with a strict separation between Specification, Tooling, and Runtime.
 
 ### 10.1 Specification-First Design (The "Single Source of Truth")
-- [ ] **Decoupled ISA Definition (`isa.json`):** Purge all implementation-specific logic (C expressions) from the core specification. It must only define the "Contract": opcodes, arity, type masks, and shape rules.
-- [ ] **Backend Implementation Specs (`cpu_spec.json`):** Create backend-specific mapping files (e.g., in `sf-runtime/backend_cpu`) that link ISA node IDs to concrete CPU implementations (expressions or manual functions).
-- [ ] **Template-Based Code Generation (Jinja2):** Replace brittle string concatenation and X-Macros with robust Python + Jinja2 templates.
-    - [ ] Generate `sf_opcodes.h` (Enums for Opcodes and Builtins).
-    - [ ] Generate `sf_op_metadata.c` (Metadata table for Compiler).
-    - [ ] Generate `sf_ops_cpu_auto.c` (Full C kernels for the CPU backend).
-- [ ] **Data-Driven Compiler:** Automate node validation and shape inference logic generation based on `isa.json` rules to eliminate manual boilerplate.
-- [ ] **Schema Validation:** Ensure `isa.json` adheres to a strict schema for professional-grade reliability.
+- [x] **Decoupled ISA Definition (`isa.json`):** Purge all implementation-specific logic (C expressions) from the core specification. It must only define the "Contract".
+- [x] **Backend Implementation Specs (`cpu_spec.json`):** Created backend-specific mapping files in `tools/metadata` that link ISA nodes to concrete implementations.
+- [x] **Template-Based Code Generation (Jinja2):** Replaced brittle X-Macros with robust Python + Jinja2 templates for Opcodes, Metadata, and Kernels.
+- [ ] **Compiler Transformation Spec (`compiler_spec.json`):** Move high-level compiler logic into declarative metadata.
+    - [ ] **Fusion & Lowering:** Define patterns (e.g., `Mul+Add -> FMA`) and macro-node decompositions (e.g., `Mean -> Sum/Size`) in JSON.
+    - [ ] **Mathematical Axioms:** Declare commutativity, associativity, and purity (side-effects) to automate optimizer permutations.
+    - [ ] **Provider Registry:** Map external strings (`host.time`, `host.index.N`) to internal opcodes via aliases.
+- [ ] **Data-Driven Validation & Analysis:** Move rank/shape constraints and type promotion rules from manual C code to schema-validated JSON formulas.
+- [ ] **Schema Validation:** Ensure all `.json` metadata files adhere to a strict schema for professional-grade reliability.
 
 ### 10.2 Modular Dependency Management
 - [x] **vcpkg Integration:** Create official `vcpkg` ports for `sf-spec`, `sf-compiler`, and `sf-runtime`.
