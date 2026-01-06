@@ -25,6 +25,7 @@ install(TARGETS base isa
 # Install headers
 install(DIRECTORY base/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY isa/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY generated/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Generate and install the export file
 install(EXPORT SionFlowSpecTargets

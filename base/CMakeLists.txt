@@ -13,6 +13,7 @@ add_library(SionFlow::base ALIAS base)
 target_include_directories(base 
     PUBLIC 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../generated/include>
         $<INSTALL_INTERFACE:include>
     PRIVATE src
 )

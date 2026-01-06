@@ -56,9 +56,10 @@ typedef enum {
 typedef enum {
     SF_STRATEGY_DEFAULT,         // Simple parallel execution
     SF_STRATEGY_REDUCTION,       // Partial result per thread -> Final merge
-    SF_STRATEGY_TWO_PASS_SYNC,   // Two passes with a barrier (e.g. CumSum)
-} sf_dispatch_strategy;
-
-#include "sf_ops_db.inc"
-
-#endif // SF_OP_DEFS_H
+        SF_STRATEGY_TWO_PASS_SYNC,   // Two passes with a barrier (e.g. CumSum)
+    } sf_dispatch_strategy;
+    
+    #include <sionflow/isa/sf_ops_db.inc>
+    
+    #endif // SF_OP_DEFS_H
+    

@@ -116,9 +116,12 @@ typedef enum {
 } sf_access_mode;
 
 // --- Builtin Identifiers ---
+#include <sionflow/base/sf_builtins.h>
+
 typedef enum {
-    SF_BUILTIN_NONE = 0,
-    SF_BUILTIN_INDEX,       // spatial index (e.g. host.index)
+#define SF_BUILTIN(id, name) SF_BUILTIN_##id,
+    SF_BUILTIN_LIST
+#undef SF_BUILTIN
     SF_BUILTIN_COUNT
 } sf_builtin_id;
 

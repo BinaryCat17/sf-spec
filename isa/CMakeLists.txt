@@ -6,6 +6,7 @@ add_library(SionFlow::isa ALIAS isa)
 
 target_include_directories(isa PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../generated/include>
     $<INSTALL_INTERFACE:include>
 )
 

@@ -84,9 +84,13 @@
 ## Phase 10: The Great Decoupling & Standardization
 **Goal:** Transform SionFlow into a professional, multi-repo ecosystem with a strict separation between Specification, Tooling, and Runtime.
 
-### 10.1 Specification-First Design (sf-spec)
-- [ ] **JSON-Based ISA:** Define all opcodes, types, and providers in a single `isa.json` file.
-- [ ] **Universal ISA Generator:** Develop a tool to automatically generate C headers (`sf_opcodes.h`), documentation, and potentially Python/Rust bindings from the JSON spec.
+### 10.1 Specification-First Design (The "Single Source of Truth")
+- [ ] **Unified ISA Definition (`isa.json`):** Create a comprehensive machine-readable specification of all dtypes, opcodes, nodes, and their semantic rules (types, shapes, access).
+- [ ] **Universal Code Generator (`tools/isa_gen.py`):** Develop a Python tool to synchronize the codebase with `isa.json`.
+    - [ ] Generate `sf_opcodes.h` (Enums for Opcodes and Builtins).
+    - [ ] Generate `sf_op_metadata.c` (Metadata table for Compiler).
+    - [ ] Generate `sf_ops_db.inc` (X-Macros for Runtime Kernels).
+- [ ] **Schema Validation:** Ensure `isa.json` adheres to a strict schema for professional-grade reliability.
 - [ ] **Zero-Logic Foundation:** Ensure the specification repo contains only headers and data structures, serving as the "Single Source of Truth".
 
 ### 10.2 Modular Dependency Management
