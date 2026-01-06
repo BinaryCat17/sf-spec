@@ -1,5 +1,6 @@
 add_library(isa STATIC
     src/sf_tensor.c
+    src/sf_exec_ctx.c
     "${CMAKE_CURRENT_SOURCE_DIR}/../tools/generated/src/sf_opcodes.c"
 )
 add_library(SionFlow::isa ALIAS isa)

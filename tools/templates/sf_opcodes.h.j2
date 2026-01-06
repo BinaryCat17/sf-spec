@@ -34,7 +34,9 @@ typedef enum {
 
 #include <sionflow/isa/sf_op_defs.h>
 
+extern const sf_op_metadata SF_OP_METADATA[SF_NODE_COUNT];
+
 const char* sf_opcode_to_str(u16 opcode);
-const sf_runtime_op_metadata* sf_get_op_metadata(u16 opcode);
+const sf_op_metadata* sf_get_op_metadata(u16 opcode);
 
 #endif // SF_OPCODES_H

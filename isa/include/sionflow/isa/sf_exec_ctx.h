@@ -5,7 +5,6 @@
 #include <sionflow/isa/sf_program.h>
 #include <sionflow/base/sf_memory.h>
 #include <sionflow/base/sf_platform.h>
-#include <string.h> // memset
 
 // Forward decl
 typedef struct sf_exec_ctx sf_exec_ctx;
@@ -69,57 +68,10 @@ struct sf_exec_ctx {
     void* user_data;
 };
 
-// --- Execution Context API (Inlined) ---
+// --- Execution Context API (Internal) ---
 
-static inline void sf_exec_ctx_init(sf_exec_ctx* ctx, sf_allocator* allocator) {
-    memset(ctx, 0, sizeof(sf_exec_ctx));
-    ctx->allocator = allocator;
-    ctx->ndim = 1; // Default
-    ctx->tile_size[0] = 1;
-    ctx->domain_shape[0] = 1;
-    ctx->batch_size = 1;
-    ctx->global_error_ptr = NULL;
-}
-
-static inline bool sf_exec_ctx_resize_tensor(sf_exec_ctx* ctx, sf_tensor* tensor, const int32_t* new_shape, uint8_t new_ndim) {
-    if (!tensor) return false;
-    
-    int32_t resolved_shape[SF_MAX_DIMS];
-    if (new_ndim > 0) {
-        for (int i = 0; i < new_ndim; ++i) resolved_shape[i] = new_shape[i];
-        if (resolved_shape[0] <= 0 && ctx && ctx->batch_size > 0) {
-            resolved_shape[0] = (int32_t)ctx->batch_size;
-        }
-    }
-
-    sf_type_info info;
-    sf_type_info_init_contiguous(&info, tensor->info.dtype, (new_ndim > 0) ? resolved_shape : new_shape, new_ndim);
-
-    if (!sf_tensor_resize(tensor, (ctx ? ctx->allocator : NULL), &info)) {
-        if (ctx) ctx->error = SF_ERROR_OOM;
-        return false;
-    }
-    return true;
-}
-
-/**
- * @brief Allocates temporary memory from the thread-local scratchpad.
- * This memory is only valid during the current instruction execution or tile processing.
- */
-static inline void* sf_exec_ctx_scratch_alloc(sf_exec_ctx* ctx, size_t size) {
-    if (!ctx->allocator) return NULL;
-    return ctx->allocator->alloc(ctx->allocator, size);
-}
-
-/**
- * @brief Creates a temporary tensor on the scratchpad.
- */
-static inline sf_tensor* sf_exec_ctx_scratch_tensor(sf_exec_ctx* ctx, const sf_type_info* info) {
-    if (!ctx->allocator) return NULL;
-    sf_tensor* t = (sf_tensor*)ctx->allocator->alloc(ctx->allocator, sizeof(sf_tensor));
-    if (!t) return NULL;
-    if (!sf_tensor_alloc(t, ctx->allocator, info)) return NULL;
-    return t;
-}
+void sf_exec_ctx_init(sf_exec_ctx* ctx, sf_allocator* allocator);
+void* sf_exec_ctx_scratch_alloc(sf_exec_ctx* ctx, size_t size);
+sf_tensor* sf_exec_ctx_scratch_tensor(sf_exec_ctx* ctx, const sf_type_info* info);
 
 #endif // SF_EXEC_CTX_H

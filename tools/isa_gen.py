@@ -37,14 +37,24 @@ def main():
             manifest_data = json.load(f)
             
     # 5. Prepare Context
-    ports_by_opcode = {}
+    meta_by_opcode = {}
     for node in isa_data["nodes"]:
         opcode = node["opcode"]
-        if opcode not in ports_by_opcode:
+        if opcode == "NOOP": continue # Skip internal nodes without real opcodes
+        
+        if opcode not in meta_by_opcode:
             ports = [p["name"] for p in node.get("inputs", [])]
             while len(ports) < 4:
                 ports.append(None)
-            ports_by_opcode[opcode] = ports
+            
+            meta_by_opcode[opcode] = {
+                "ports": ports,
+                "category": node.get("category", "atomic"),
+                "strategy": node.get("strategy", "default"),
+                "shape_rule": node.get("shape_rule", "broadcast"),
+                "type_rule": node.get("type_rule", "same_as_input"),
+                "access": node.get("access", "linear")
+            }
 
     context = {
         "opcodes": isa_data["opcodes"],
@@ -52,7 +62,7 @@ def main():
         "dtypes": isa_data["dtypes"],
         "type_masks": isa_data["type_masks"],
         "nodes_by_id": {n["id"]: n for n in isa_data["nodes"]},
-        "ports_by_opcode": ports_by_opcode,
+        "meta_by_opcode": meta_by_opcode,
         "implementations": backend_data.get("implementations", {}),
         "compiler": compiler_data,
         "manifest": manifest_data.get("manifest", {})

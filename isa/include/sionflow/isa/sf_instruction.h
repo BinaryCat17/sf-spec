@@ -2,7 +2,7 @@
 #define SF_INSTRUCTION_H
 
 #include <sionflow/base/sf_types.h>
-#include "sf_opcodes.h"
+#include <sionflow/isa/sf_opcodes.h>
 
 /**
  * @brief Standard 4-address code instruction.

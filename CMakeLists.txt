@@ -8,16 +8,16 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 find_package(Python3 REQUIRED)
 
 set(ISA_JSON "${CMAKE_CURRENT_SOURCE_DIR}/tools/metadata/isa.json")
+set(COMPILER_SPEC "${CMAKE_CURRENT_SOURCE_DIR}/../sf-compiler/tools/metadata/compiler_spec.json")
 set(ISA_GEN_PY "${CMAKE_CURRENT_SOURCE_DIR}/tools/isa_gen.py")
-set(GEN_H "${CMAKE_CURRENT_SOURCE_DIR}/tools/generated/include/sionflow/isa/sf_opcodes.h")
-set(GEN_C "${CMAKE_CURRENT_SOURCE_DIR}/tools/generated/src/sf_opcodes.c")
 
 add_custom_command(
     OUTPUT "${GEN_H}" "${GEN_C}"
     COMMAND Python3::Interpreter "${ISA_GEN_PY}" --isa "${ISA_JSON}" 
+            --compiler "${COMPILER_SPEC}"
             --render "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.h.j2:${GEN_H}"
                      "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.c.j2:${GEN_C}"
-    DEPENDS "${ISA_JSON}" "${ISA_GEN_PY}" 
+    DEPENDS "${ISA_JSON}" "${ISA_GEN_PY}" "${COMPILER_SPEC}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.h.j2"
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.c.j2"
     COMMENT "Generating SionFlow ISA (Headers & Metadata)"

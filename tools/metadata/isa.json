@@ -297,6 +297,7 @@
       "access": "special",
       "type_rule": "force_f32",
       "shape_rule": "special",
+      "flags": ["GENERATOR", "SPATIAL"],
       "inputs": []
     },
     {
@@ -307,6 +308,7 @@
       "access": "special",
       "type_rule": "force_f32",
       "shape_rule": "special",
+      "flags": ["GENERATOR", "SPATIAL"],
       "inputs": []
     },
     {
@@ -317,6 +319,7 @@
       "access": "special",
       "type_rule": "force_f32",
       "shape_rule": "special",
+      "flags": ["GENERATOR", "SPATIAL"],
       "inputs": []
     },
     {
@@ -327,6 +330,8 @@
       "access": "linear",
       "type_rule": "same_as_input",
       "shape_rule": "broadcast",
+      "flags": ["COMMUTATIVE", "ASSOCIATIVE"],
+      "assertions": [{ "type": "BROADCAST_COMPATIBLE" }],
       "inputs": [
         {
           "name": "a",
@@ -901,6 +906,7 @@
       "access": "global",
       "type_rule": "same_as_input",
       "shape_rule": "scalar",
+      "flags": ["REDUCER"],
       "inputs": [
         {
           "name": "in",
@@ -917,6 +923,11 @@
       "access": "window",
       "type_rule": "force_f32",
       "shape_rule": "dot",
+      "flags": ["REDUCER"],
+      "min_rank": 1,
+      "assertions": [
+        { "type": "MATCH_DIM", "p0": 0, "a0": -1, "p1": 1, "a1": -1, "msg": "Last dimensions mismatch" }
+      ],
       "inputs": [
         {
           "name": "a",
@@ -984,6 +995,10 @@
       "access": "window",
       "type_rule": "same_as_input",
       "shape_rule": "matmul",
+      "min_rank": 2,
+      "assertions": [
+        { "type": "MATCH_DIM", "p0": 0, "a0": 1, "p1": 1, "a1": 0, "msg": "Inner dimensions mismatch" }
+      ],
       "inputs": [
         {
           "name": "a",
