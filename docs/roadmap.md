@@ -86,22 +86,28 @@
 
 ### 10.1 Specification-First Design (sf-spec)
 - [ ] **JSON-Based ISA:** Define all opcodes, types, and providers in a single `isa.json` file.
-- [ ] **Code Generation:** Develop a tool to automatically generate C headers (`sf_opcodes.h`) and documentation from the JSON spec.
+- [ ] **Universal ISA Generator:** Develop a tool to automatically generate C headers (`sf_opcodes.h`), documentation, and potentially Python/Rust bindings from the JSON spec.
 - [ ] **Zero-Logic Foundation:** Ensure the specification repo contains only headers and data structures, serving as the "Single Source of Truth".
 
 ### 10.2 Modular Dependency Management
-- [ ] **vcpkg Integration:** Create official `vcpkg` ports for `sf-spec`, `sf-compiler`, and `sf-runtime`.
-- [ ] **Strict Linking:** Ensure the Runtime can be built and distributed without a single line of Compiler or JSON-parsing code.
+- [x] **vcpkg Integration:** Create official `vcpkg` ports for `sf-spec`, `sf-compiler`, and `sf-runtime`.
+- [x] **Developer Overlay Workflow:** Implement a `vcpkg-overlays/` system to allow seamless local development across repositories without constant re-installation.
+- [x] **CMake Export Strategy:** Implement proper `find_package` support by creating `*Config.cmake` files and export targets for all modules.
+- [x] **Strict Linking:** Ensure the Runtime can be built and distributed without a single line of Compiler or JSON-parsing code.
 
 ### 10.3 Runtime Sterilization
 - [ ] **Binary-Only Loader:** Remove JSON loading from `sf_loader`. The production runtime will strictly accept only `.sfc` (binary) cartridges.
 - [ ] **Stateless Execution:** Finalize the removal of all global state from the loader and engine to support multi-instance hosting.
 
 ### 10.4 Integration & Validation Ecosystem (mf-tests)
-- [ ] **Dedicated Test Repo:** Separate all `.mfapp` projects, JSON graphs, and assets into a standalone repository.
-- [ ] **Automated Test Runner:** Create a utility that automatically compiles all test graphs using `sfc` and verifies their execution against golden outputs.
+- [x] **Dedicated Test Repo:** Separate all `.mfapp` projects, JSON graphs, and assets into a standalone repository (sf-samples/tests).
+- [x] **Automated Test Runner:** Create a utility that automatically compiles all test graphs using `sfc` and verifies their execution against golden outputs.
 - [ ] **Cross-Component CI:** Implement CI that triggers on changes in any repo to ensure the Spec, Compiler, and Runtime remain perfectly synchronized.
 
 ### 10.5 Library Distribution & Stability
 - [ ] **C-API Hardening:** Guarantee a stable ABI for `libsionflow-rt` for 3rd-party language bindings (Python/Rust).
 - [ ] **Reflection Metadata:** Allow optional embedding of debug symbols in cartridges for tooling support without bloating the runtime.
+
+### 10.6 Release Engineering
+- [ ] **Semantic Versioning (SemVer):** Implement strict versioning for all components to manage breaking changes in the ISA or binary format.
+- [ ] **Automated Release Pipeline:** Tools to synchronize versions across all four repositories during a release.
