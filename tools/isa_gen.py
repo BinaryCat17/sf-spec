@@ -61,6 +61,7 @@ def main():
         "nodes": isa_data["nodes"],
         "dtypes": isa_data["dtypes"],
         "type_masks": isa_data["type_masks"],
+        "constants": isa_data["constants"],
         "nodes_by_id": {n["id"]: n for n in isa_data["nodes"]},
         "meta_by_opcode": meta_by_opcode,
         "implementations": backend_data.get("implementations", {}),

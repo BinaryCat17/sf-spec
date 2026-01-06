@@ -1,0 +1,54 @@
+#ifndef SF_ISA_CONSTANTS_H
+#define SF_ISA_CONSTANTS_H
+
+/**
+ * SionFlow ISA Constants & Enums
+ * Automatically generated from isa.json. DO NOT EDIT.
+ */
+
+// --- Op Categories ---
+typedef enum {
+{%- for item in constants.categories %}
+    SF_OP_CAT_{{ item.id | upper }}, // {{ item.summary }}
+{%- endfor %}
+    SF_OP_CAT_COUNT
+} sf_op_category;
+
+// --- Dispatch Strategies ---
+typedef enum {
+{%- for item in constants.strategies %}
+    SF_STRATEGY_{{ item.id | upper }}, // {{ item.summary }}
+{%- endfor %}
+    SF_STRATEGY_COUNT
+} sf_dispatch_strategy;
+
+// --- Type Rules ---
+typedef enum {
+{%- for item in constants.type_rules %}
+    SF_OUT_{{ item.id | upper }}, // {{ item.summary }}
+{%- endfor %}
+    SF_OUT_COUNT
+} sf_out_rule;
+
+// --- Shape Rules ---
+typedef enum {
+{%- for item in constants.shape_rules %}
+    SF_SHAPE_{{ item.id | upper }}, // {{ item.summary }}
+{%- endfor %}
+    SF_SHAPE_COUNT
+} sf_shape_rule;
+
+// --- Access Patterns ---
+typedef enum {
+{%- for item in constants.access_patterns %}
+    SF_ACCESS_{{ item.id | upper }}, // {{ item.summary }}
+{%- endfor %}
+    SF_ACCESS_COUNT
+} sf_access_pattern;
+
+// --- Type Masks ---
+{%- for name, dtypes in type_masks.items() %}
+#define SF_TYPE_MASK_{{ name | upper }} ({% for dt in dtypes %}(1 << SF_DTYPE_{{ dt | upper }}){% if not loop.last %} | {% endif %}{% endfor %})
+{%- endfor %}
+
+#endif // SF_ISA_CONSTANTS_H
