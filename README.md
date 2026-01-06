@@ -1,0 +1,81 @@
+# SionFlow
+
+**SionFlow** is a high-performance, data-oriented computation engine designed for real-time applications, games, and creative tools. It separates the **definition** of logic (Node Graphs) from its **execution** (Virtual Machine), using a Columnar Memory Model (SoA) for maximum cache efficiency and future GPU scalability.
+
+> **Status:** Active Development (Core VM & Compiler Phase).
+
+## Key Features
+
+*   **Data-Oriented Architecture:** Data is stored in Structure-of-Arrays (Columns), optimized for SIMD and GPU transfer.
+*   **Modular Design:** Decoupled modules for Compiler, VM, and Backends.
+*   **Optimizing Compiler:** Multi-pass pipeline featuring instruction fusion (FMA), advanced lowering (MEAN decomposition), and liveness-based register allocation (Buffer Aliasing).
+*   **Portable C11:** Written in strict C11, no heavy dependencies (only `cJSON` for the compiler).
+*   **Safety & Abstraction:** Accessor API with bounds checking protects memory integrity while keeping the backend agnostic to storage location (RAM/VRAM).
+*   **Cross-Platform:** Built with CMake, supports Linux and Windows via presets.
+
+## Getting Started
+
+### Prerequisites
+*   CMake (3.25+)
+*   C Compiler (GCC/Clang/MSVC)
+*   [vcpkg](https://github.com/microsoft/vcpkg) (for dependency management)
+
+### Build Instructions
+
+1.  **Configure vcpkg:**
+    Ensure `VCPKG_ROOT` environment variable is set.
+
+2.  **Build (Linux):**
+    ```bash
+    cmake --preset x64-debug-linux
+    cmake --build out/build/x64-debug-linux
+    ```
+
+3.  **Build (Windows):**
+    Open the folder in Visual Studio or use:
+    ```cmd
+    cmake --preset x64-debug-win
+    cmake --build out/build/x64-debug-win
+    ```
+
+## Usage
+
+SionFlow comes with a CLI tool `sf-runner` for text output and `sf-window` for real-time visual output (SDL2).
+
+**Run a test graph (CLI):**
+```bash
+./out/build/x64-debug-linux/sf-runner assets/projects/inventory/inventory.json
+```
+
+**Run a Pixel Math demo (Visual):**
+```bash
+./out/build/x64-debug-linux/apps/sf-window/sf-window assets/projects/sdf_button/sdf_button.mfapp
+```
+
+**Output:**
+```
+SionFlow Tensor Runner. Loading: assets/projects/inventory/inventory.json
+Program: 12 tensors, 6 insts
+...
+  [11] Shape: [5] F32: {0.00, 1200.00, 1440.00, 0.00, 12000.00}
+```
+
+## Documentation
+
+For deep dives into the system design:
+
+*   [Architecture](docs/architecture.md) - System overview, modules, and memory model.
+*   [Roadmap](docs/roadmap.md) - Current progress and future plans.
+
+## Project Structure
+
+*   `modules/`
+    *   `isa/` - Instruction Set Architecture definitions (The Contract).
+    *   `engine/` - The Runtime Core (API, Memory, Dispatch).
+    *   `compiler/` - Translates JSON Graphs to Bytecode (`sf_program`).
+    *   `backend_cpu/` - Parallel CPU Execution (Thread Pool).
+    *   `host/` - Application Framework (Window, Input, Loading).
+*   `apps/`
+    *   `sf-runner/` - CLI tool for testing and execution.
+    *   `sf-window/` - GUI tool for real-time visualization.
+*   `assets/` - Test projects (graphs + manifests).
