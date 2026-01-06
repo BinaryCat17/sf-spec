@@ -7,7 +7,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # --- ISA Generation ---
 find_package(Python3 REQUIRED)
 
-set(ISA_JSON "${CMAKE_CURRENT_SOURCE_DIR}/isa/isa.json")
+set(ISA_JSON "${CMAKE_CURRENT_SOURCE_DIR}/tools/metadata/isa.json")
 set(ISA_GEN_PY "${CMAKE_CURRENT_SOURCE_DIR}/tools/isa_gen.py")
 set(GEN_H "${CMAKE_CURRENT_SOURCE_DIR}/tools/generated/include/sionflow/isa/sf_opcodes.h")
 set(GEN_C "${CMAKE_CURRENT_SOURCE_DIR}/tools/generated/src/sf_opcodes.c")
