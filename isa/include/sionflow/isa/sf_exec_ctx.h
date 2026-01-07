@@ -3,6 +3,7 @@
 
 #include <sionflow/isa/sf_tensor.h>
 #include <sionflow/isa/sf_program.h>
+#include <sionflow/isa/sf_state.h>
 #include <sionflow/base/sf_memory.h>
 #include <sionflow/base/sf_platform.h>
 
@@ -10,14 +11,6 @@
 typedef struct sf_exec_ctx sf_exec_ctx;
 
 // --- Execution State ---
-typedef enum {
-    SF_ERROR_NONE = 0,
-    SF_ERROR_OOM = 1,          
-    SF_ERROR_SHAPE_MISMATCH = 2, 
-    SF_ERROR_INVALID_OP = 3,
-    SF_ERROR_RUNTIME = 4,
-    SF_ERROR_OUT_OF_BOUNDS = 5
-} sf_exec_error;
 
 static inline const char* sf_exec_error_to_str(sf_exec_error err) {
     switch (err) {
@@ -37,9 +30,9 @@ static inline const char* sf_exec_error_to_str(sf_exec_error err) {
  */
 struct sf_exec_ctx {
     // Flat Execution Registry (Zero-Overhead Access)
-    void* reg_ptrs[SF_MAX_REGISTERS];           // Base pointers for registers
-    int32_t reg_strides[SF_MAX_REGISTERS];      // Pre-calculated byte strides for current task
-    sf_type_info reg_info[SF_MAX_REGISTERS];    // Metadata for registers
+    void* reg_ptrs[SF_MAX_REGISTERS];               // Base pointers for registers
+    int32_t reg_strides[SF_MAX_REGISTERS][SF_MAX_DIMS]; // Pre-calculated N-D byte strides for current task
+    sf_type_info reg_info[SF_MAX_REGISTERS];        // Metadata for registers
     
     // Optional allocator for temporary allocations during execution
     sf_allocator* allocator; 
@@ -54,6 +47,7 @@ struct sf_exec_ctx {
     u32 tile_offset[SF_MAX_DIMS];  // Start coords of this tile/batch
     u32 tile_size[SF_MAX_DIMS];    // Size of this tile/batch (active elements)
     u32 domain_shape[SF_MAX_DIMS]; // Total size of the execution domain
+    sf_grid grid;                  // Execution grid parameters
 
     // State
     sf_exec_error error;

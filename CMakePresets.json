@@ -4,10 +4,11 @@
     {
       "name": "default",
       "hidden": true,
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "binaryDir": "$env{SIONFLOW_BUILD_ROOT}/sf-spec/${presetName}",
       "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache"
       }
     },
     {

@@ -115,5 +115,15 @@ typedef enum {
     SF_ACCESS_RW = 2
 } sf_access_mode;
 
+// --- Execution Errors ---
+typedef enum {
+    SF_ERROR_NONE = 0,
+    SF_ERROR_OOM = 1,          
+    SF_ERROR_SHAPE_MISMATCH = 2, 
+    SF_ERROR_INVALID_OP = 3,
+    SF_ERROR_RUNTIME = 4,
+    SF_ERROR_OUT_OF_BOUNDS = 5
+} sf_exec_error;
+
 #endif // SF_TYPES_H
 

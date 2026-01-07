@@ -51,24 +51,37 @@ void sf_shape_normalize(sf_type_info* info) {
     sf_shape_calc_strides(info);
 }
 
-void sf_shape_infer_strides(const sf_type_info* shape, const sf_type_info* domain, int32_t* out_strides) {
+void sf_shape_get_broadcast_strides(const sf_type_info* tensor, const sf_type_info* domain, int32_t* out_strides) {
     for (int i = 0; i < SF_MAX_DIMS; ++i) out_strides[i] = 0;
-    if (shape->ndim == 0) return;
     
-    int32_t current_stride = 1;
-    int s_idx = (int)shape->ndim - 1;
+    // Scalar tensor has 0 strides in all domain dimensions
+    if (sf_shape_is_scalar(tensor)) return;
+
+    // Temporary tensor to get standard contiguous strides
+    sf_type_info t = *tensor;
+    sf_shape_calc_strides(&t);
+
+    int t_idx = (int)tensor->ndim - 1;
     int d_idx = (int)domain->ndim - 1;
-    
-    while (s_idx >= 0 && d_idx >= 0) {
-        if (shape->shape[s_idx] == domain->shape[d_idx]) {
-            out_strides[d_idx] = current_stride;
-            current_stride *= shape->shape[s_idx];
-        } else if (shape->shape[s_idx] == 1) {
-            out_strides[d_idx] = 0;
+
+    while (d_idx >= 0) {
+        if (t_idx >= 0) {
+            // If dimensions match, take the tensor's native stride
+            if (tensor->shape[t_idx] == domain->shape[d_idx]) {
+                out_strides[d_idx] = t.strides[t_idx];
+            } else if (tensor->shape[t_idx] == 1) {
+                // If tensor dimension is 1, it broadcasts (stride 0)
+                out_strides[d_idx] = 0;
+            } else {
+                // Incompatible dimensions should have been caught by compiler, 
+                // but we safely set to 0 here.
+                out_strides[d_idx] = 0;
+            }
+            t_idx--;
         } else {
+            // Tensor rank is smaller than domain rank: it broadcasts (stride 0)
             out_strides[d_idx] = 0;
         }
-        s_idx--;
         d_idx--;
     }
 }
@@ -115,11 +128,4 @@ bool sf_shape_broadcast(const sf_type_info* a, const sf_type_info* b, sf_type_in
     sf_shape_calc_strides(out);
     return true;
 }
-
-i32 sf_shape_calc_linear_stride(size_t op_count, size_t dom_count) {
-    if (dom_count <= 1) return (op_count > 0) ? 1 : 0;
-    if (op_count == dom_count) return 1;
-    if (op_count == 1) return 0;
-    if (op_count > dom_count && (op_count % dom_count) == 0) return (i32)(op_count / dom_count);
-    return 0;
-}// dev mode test
+// dev mode test

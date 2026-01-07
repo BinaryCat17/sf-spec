@@ -34,6 +34,8 @@ typedef enum {
 
 // Binding Flags
 #define SF_BINDING_FLAG_REDUCTION (1 << 0)
+#define SF_BINDING_FLAG_READ      (1 << 1)
+#define SF_BINDING_FLAG_WRITE     (1 << 2)
 
 // --- Cartridge Container (Level 0) ---
 
@@ -87,13 +89,17 @@ typedef struct {
     uint32_t reserved;
 } sf_bin_task_binding;
 
+// Task Flags
+#define SF_TASK_FLAG_BARRIER      (1 << 0)
+
 // A single execution unit within a program (e.g. for a specific Output shape)
 typedef struct sf_task {
     uint32_t start_inst;
     uint32_t inst_count;
     uint32_t domain_reg; // Index of the register that defines the execution domain (usually an Output)
     uint8_t strategy;    // sf_dispatch_strategy
-    uint8_t reserved[3];
+    uint8_t flags;       // SF_TASK_FLAG_*
+    uint8_t reserved[2];
     
     uint32_t binding_offset; // Offset into global binding table
     uint32_t binding_count;  // Number of registers used in this task

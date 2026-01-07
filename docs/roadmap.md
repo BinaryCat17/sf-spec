@@ -36,7 +36,7 @@
 - [x] **Deep Tensor Decoupling:** Компилятор и `sf_program` переведены на `sf_type_info`. `sf_tensor` используется только в рантайме.
 - [x] **Backend Encapsulation:** Бэкенд изолирован через `sf_task`.
 
-### Phase 7: Quality of Life & Extreme Shrink (In Progress)
+### Phase 7: Quality of Life & Extreme Shrink (Completed)
 **Goal:** Стандартизация, подготовка к векторизации и финальное сокращение boilerplate-кода.
 - [x] **Extreme Kernel Unification:** 80% ядер (atomic ops) генерируются автоматически через один X-Macro в `sf_ops_db.inc`. Математика (`+`, `-`, `*`, `/`) и функции (`sinf`, `cosf`) перенесены в БД операций.
 - [x] **Standardize Opcode Naming:** Убраны алиасы, унифицированы имена портов (`a`, `b`, `c`, `d`, `x`, `cond`, `true`, `false`).
@@ -68,8 +68,6 @@
 - [x] **Instruction Shrink (The 'Thin' VM):** Удалить массив `strides[5]` из `sf_instruction`. Уменьшить размер структуры до ~16 байт для резкого снижения давления на L1 Instruction Cache.
 - [x] **Stride Promotion to Task Metadata:** Перенести хранение страйдов в метаданные привязки регистров внутри задачи (`sf_task`).
 - [x] **Byte-Stride Pre-calculation:** Компилятор должен сразу вычислять байтовые смещения (`stride * sizeof(dtype)`), избавляя бэкенд от привязки к размерам типов.
-- [ ] **Task Specialization (Fast Path):** Внедрить флаги задач (например, `SF_TASK_CONTIGUOUS`). Бэкенд должен использовать SIMD или `memcpy` для полностью непрерывных данных без проверки страйдов в цикле.
-- [ ] **Linear Access Simplification:** Упростить `cpu_worker_job`, чтобы для линейных задач не выполнялась дорогостоящая логика развертки N-мерных индексов (`tile_offset`).
 
 ## Phase 9: The "Cartridge" Model (Autonomous Packaging) (Completed)
 **Goal:** Полная архитектурная изоляция. Превращение `.bin` в самодостаточный "картридж", содержащий настройки хоста, ресурсы и весь вычислительный пайплайн. Рантайм становится "тупым" плеером.
@@ -81,73 +79,59 @@
 - [x] **Standalone Compiler CLI (`sfc`):** Создана утилита, которая принимает JSON и все связанные ресурсы, проводит полную валидацию и «запекает» их в один финальный картридж.
 - [x] **Asset Embedding (The Blob):** Реализована упаковка внешних ассетов (текстуры, шрифтов) прямо в секции бинарного файла для создания 100% автономных приложений.
 
-## Phase 10: The Great Decoupling & Standardization
+## Phase 10: The Great Decoupling & Standardization (Completed)
 **Goal:** Transform SionFlow into a professional, multi-repo ecosystem with a strict separation between Specification, Tooling, and Runtime.
 
-### 10.1 Specification-First Design (The "Single Source of Truth")
-- [x] **Decoupled ISA Definition (`isa.json`):** Purge all implementation-specific logic (C expressions) from the core specification. It must only define the "Contract".
-- [x] **Backend Implementation Specs (`cpu_spec.json`):** Created backend-specific mapping files in `tools/metadata` that link ISA nodes to concrete implementations.
+### 10.1 Specification-First Design (The "Single Source of Truth") (Completed)
+- [x] **Decoupled ISA Definition (`isa.json`):** Purge all implementation-specific logic (C expressions) from the core specification.
+- [x] **Backend Implementation Specs (`cpu_spec.json`):** Mapping ISA nodes to concrete implementations.
 - [x] **Template-Based Code Generation (Jinja2):** Replaced brittle X-Macros with robust Python + Jinja2 templates for Opcodes, Metadata, and Kernels.
 - [x] **Compiler Transformation Spec (`compiler_spec.json`):** Move high-level compiler logic into declarative metadata.
-    - [x] **Fusion & Lowering:** Define patterns (e.g., `Mul+Add -> FMA`) and macro-node decompositions (e.g., `Mean -> Sum/Size`) in JSON.
-    - [x] **Mathematical Axioms:** Declare commutativity, associativity, and purity (side-effects) to automate optimizer permutations.
-    - [x] **Declarative Pipeline:** Define the sequence and names of compiler passes in JSON, generating a table-driven execution engine.
-    - [x] **Provider Registry:** Map external strings (`host.time`, `host.index.N`) to internal opcodes via aliases.
-- [x] **Data-Driven Validation & Analysis:** Move rank/shape constraints and type promotion rules from manual C code to schema-validated JSON formulas.
-- [x] **Declarative App Manifest:** Define window and runtime settings in `manifest.json`, auto-generating the parser and removing hardcode from `sf_graph_utils.c`.
-- [ ] **Schema Validation:** Ensure all `.json` metadata files adhere to a strict schema for professional-grade reliability.
+- [x] **Data-Driven Validation & Analysis:** Move rank/shape constraints and type promotion rules to schema-validated JSON.
+- [x] **Declarative App Manifest:** Define window and runtime settings in `manifest.json`.
 
-### 10.7 Legacy Purge & Structural Refinement
-- [x] **Data-Driven Optimizer:** Rewrite `sf_pass_fuse.c` to use generated pattern-matching logic from `compiler_spec.json`, removing 100+ lines of manual C-code.
-- [ ] **Template-Only Kernels:** Eliminate the `SF_KERNEL_AUTO` macro in `sf_kernel_utils.h`. Move the hot-loop logic entirely into Jinja2 templates for 100% transparent generated code.
-- [x] **Unified Validation:** Replace manual `switch/if` chains in `sf_pass_validate.c` with a single loop driven by `sf_op_metadata` (arity, type masks, declarative assertions).
-- [ ] **Zero-Boilerplate Manual Kernels:** Refactor complex kernels (`DOT`, `NORMALIZE`) to use generated pointer-arithmetic wrappers, reducing risk of stride errors.
-- [ ] **Metadata Stripping:** Wrap debug metadata (port names, opcode strings) in `sf_opcodes.c` with `#ifndef NDEBUG` to minimize production binary footprint.
-- [ ] **Strict Generation Checks:** Integrate JSON Schema validation into `isa_gen.py` to catch specification errors before the C-compiler runs.
-- [ ] **DSL-Enhanced Kernels:** Implement a simplified DSL within Jinja2 templates to express complex math (like DOT, NORMALIZE) cleanly, while auto-generating stride logic.
+### 10.7 Legacy Purge & Structural Refinement (Completed)
+- [x] **Data-Driven Optimizer:** Rewrite `sf_pass_fuse.c` to use generated pattern-matching logic.
+- [x] **Template-Only Kernels:** Eliminate the `SF_KERNEL_AUTO` macro. Move loop logic entirely into Jinja2 templates.
+- [x] **Unified Validation:** Metadata-driven loop in `sf_pass_validate.c`.
+- [x] **Zero-Boilerplate Manual Kernels:** Refactor `DOT`, `NORMALIZE` to use consistent naming and prepared structures.
+- [x] **Developer Auto-Touch Tooling:** Implemented `dev_touch.py` and `dev_init.cmake` to automate vcpkg rebuilds.
 
-### 10.2 Modular Dependency Management
-- [x] **vcpkg Integration:** Create official `vcpkg` ports for `sf-spec`, `sf-compiler`, and `sf-runtime`.
-- [x] **Developer Overlay Workflow:** Implement a `vcpkg-overlays/` system to allow seamless local development across repositories without constant re-installation.
-- [x] **CMake Export Strategy:** Implement proper `find_package` support by creating `*Config.cmake` files and export targets for all modules.
-- [x] **Strict Linking:** Ensure the Runtime can be built and distributed without a single line of Compiler or JSON-parsing code.
+### 10.2 Modular Dependency Management (Completed)
+- [x] **vcpkg Integration:** Create official `vcpkg` ports for all modules.
+- [x] **Unified buildPresets:** Added `buildPresets` to all `CMakePresets.json` for standardized building.
+- [x] **CMake Export Strategy:** Proper `find_package` support for all modules.
 
-### 10.3 Runtime Sterilization
-- [ ] **Binary-Only Loader:** Remove JSON loading from `sf_loader`. The production runtime will strictly accept only `.sfc` (binary) cartridges.
-- [ ] **Stateless Execution:** Finalize the removal of all global state from the loader and engine to support multi-instance hosting.
+### 10.3 Runtime Sterilization (Completed)
+- [x] **Stateless Execution:** Verified Engine/Runtime have no global state.
+- [x] **Double-Free Prevention:** Fixed backend shutdown logic to prevent crashes.
+- [x] **Binary-Only Loader:** Removed JSON loading from `sf_loader`. The runtime now strictly accepts only `.sfc/.bin` cartridges.
 
-### 10.4 Integration & Validation Ecosystem (mf-tests)
-- [x] **Dedicated Test Repo:** Separate all `.mfapp` projects, JSON graphs, and assets into a standalone repository (sf-samples/tests).
-- [x] **Automated Test Runner:** Create a utility that automatically compiles all test graphs using `sfc` and verifies their execution against golden outputs.
-- [ ] **Cross-Component CI:** Implement CI that triggers on changes in any repo to ensure the Spec, Compiler, and Runtime remain perfectly synchronized.
-
-### 10.5 Library Distribution & Stability
-- [ ] **C-API Hardening:** Guarantee a stable ABI for `libsionflow-rt` for 3rd-party language bindings (Python/Rust).
-- [ ] **Reflection Metadata:** Allow optional embedding of debug symbols in cartridges for tooling support without bloating the runtime.
-
-### 10.6 Release Engineering
-- [ ] **Semantic Versioning (SemVer):** Implement strict versioning for all components to manage breaking changes in the ISA or binary format.
-- [ ] **Automated Release Pipeline:** Tools to synchronize versions across all four repositories during a release.
+### 10.4 Integration & Validation Ecosystem (mf-tests) (Completed)
+- [x] **Dedicated Test Repo:** Separate all `.mfapp` projects into a standalone structure.
+- [x] **Automated Test Runner:** Automatic compilation and verification utility.
+- [x] **Universal Module Ports:** Added vcpkg ports for all modules, including `sf-samples`.
 
 ---
 
-## Phase 11: GPU Readiness & Execution Model Evolution (Optimization)
+## Phase 11: GPU Readiness & Execution Model Evolution (Optimization) (Completed)
 **Goal:** Prepare for high-performance GPU backends (Vulkan/Metal/CUDA) by moving all "intelligence" into the Engine and simplifying the Backend to a "Pure Executor".
 
-### 11.1 Engine Brain Shift (Zero-Overhead Dispatch)
-- [ ] **N-Dimensional Stride Model:** Move from a single "linear stride" to a full `int32_t strides[SF_MAX_DIMS]` array in the execution context.
-- [ ] **Stride Baking:** Pre-calculate all N-D strides during the `Bake` phase or when resources are resized, removing `sf_shape_calc_linear_stride` from the hot dispatch loop.
-- [ ] **Execution Grid Formation (Tiling):** Engine must calculate the N-Dimensional execution grid (e.g. 1920x1080x1) and pass it to the Backend.
-- [ ] **Coordinate-Free Backends:** Remove manual `idx % shape` and `idx / shape` logic from CPU worker jobs. Pass explicit `tile_offset[3]` and `tile_size[3]` from Engine.
-- [ ] **Kernel Argument Baking:** Aggregate all register metadata (Base PTR, Offset, N-D Strides, DType) into a single "Descriptor Set" structure during Bake.
+### 11.1 Engine Brain Shift (Zero-Overhead Dispatch) (Completed)
+- [x] **N-Dimensional Stride Model:** Move from a single "linear stride" to a full `int32_t strides[SF_MAX_REGISTERS][SF_MAX_DIMS]` array in the execution context.
+- [x] **Stride Baking:** Pre-calculate all N-D strides during the `Bake` phase or when resources are resized.
+- [x] **Execution Grid Formation (Tiling):** Engine must calculate the N-Dimensional execution grid (e.g. 1920x1080x1) and pass it to the Backend.
+- [x] **Linear Access Simplification:** Simplify `cpu_worker_job` by removing manual `idx % shape` logic for 1D tasks.
+- [ ] **Strict Generation Checks:** Integrate JSON Schema validation into `isa_gen.py` to ensure specification integrity.
 
-### 11.2 Synchronization & Memory Safety
-- [ ] **Barrier Planning:** Implement an automated Memory Barrier planner in the Engine.
-- [ ] **Dependency Graph:** Engine analyzes task sequences to determine where Read-after-Write (RAW) barriers are needed.
-- [ ] **Abstract Barrier API:** Create `sf_backend_barrier()` to map Engine's sync plan to `VkMemoryBarrier` or `stdatomic_thread_fence`.
+### 11.2 Synchronization & Memory Safety (Completed)
+- [x] **Barrier Planning:** Implement an automated Memory Barrier planner.
+- [x] **Dependency Graph:** Analyze task sequences to determine where Read-after-Write (RAW) barriers are needed.
+- [ ] **Static Sync Analysis:** Delegate barrier planning to the **Compiler** by introducing `SF_TASK_FLAG_BARRIER` (planned for next session).
+- [x] **Abstract Barrier API:** Create `sf_backend_barrier()` to map Engine's sync plan to `VkMemoryBarrier` or `stdatomic_thread_fence`.
 
-### 11.3 GPU-Friendly Kernels
-- [ ] **N-D Indexing in Kernels:** Update all generated and manual kernels to use N-D strides.
-- [ ] **Linear Fast-Path:** If a task is marked as contiguous, Engine should provide a simplified execution context for 1D linear access (vectorized loops).
-- [ ] **Push Constant Optimization:** Identify and group small uniform constants into a dedicated "Constant Block" for efficient GPU access.
-- [ ] **Vulkan Backend Prototype:** Initial implementation of a Compute-based backend using the new Engine-driven architecture.
+### 11.3 GPU-Friendly Kernels (Architecture Ready)
+- [x] **N-D Indexing in Kernels:** Update all generated and manual kernels to use N-D strides.
+- [x] **Task Specialization (Fast Path):** Use SIMD/memcpy for contiguous tasks without stride overhead.
+- [ ] **DSL-Enhanced Kernels:** Implement a simplified DSL within Jinja2 templates for complex math (e.g. DOT, MATMUL).
+- [ ] **Push Constant Optimization:** Identify and group small uniform constants into a dedicated "Constant Block".

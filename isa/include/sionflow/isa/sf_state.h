@@ -6,6 +6,15 @@
 #include <sionflow/base/sf_platform.h>
 
 /**
+ * @brief Execution Grid for N-Dimensional dispatch.
+ */
+typedef struct {
+    uint32_t dims[SF_MAX_DIMS];       // Number of tiles in each dimension
+    uint32_t tile_shape[SF_MAX_DIMS];  // Size of each tile
+    uint32_t total_tiles;
+} sf_grid;
+
+/**
  * @brief Persistent container for tensor data and memory management.
  * Owned by the Engine. Backends read from/write to this state.
  */
@@ -18,8 +27,12 @@ typedef struct sf_state {
     // Backend-specific prepared execution plan
     void* baked_data;
 
-    // Task-specific pre-calculated linear strides
-    int32_t* task_strides; // [register_count]
+    // Task-specific pre-calculated N-D strides
+    // Pointing to a block of [register_count * SF_MAX_DIMS] int32_t
+    int32_t* task_strides; 
+    
+    // Execution grid for the current task
+    sf_grid grid;
 
     // Error flag set by execution contexts.
     // 0 = No Error. Uses sf_exec_error codes.

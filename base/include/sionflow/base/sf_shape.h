@@ -39,6 +39,11 @@ void sf_shape_format(const sf_type_info* info, char* buf, size_t size);
  * Returns true if successful, false if shapes are incompatible.
  */
 bool   sf_shape_broadcast(const sf_type_info* a, const sf_type_info* b, sf_type_info* out);
-i32    sf_shape_calc_linear_stride(size_t op_count, size_t dom_count);
+
+/**
+ * @brief Calculates N-Dimensional strides for a tensor relative to an execution domain.
+ * Supports NumPy-style broadcasting rules.
+ */
+void sf_shape_get_broadcast_strides(const sf_type_info* tensor, const sf_type_info* domain, int32_t* out_strides);
 
 #endif // SF_SHAPE_H

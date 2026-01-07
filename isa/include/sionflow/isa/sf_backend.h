@@ -46,8 +46,22 @@ typedef struct {
     
     sf_backend_bake_func bake;
     sf_backend_free_baked_func free_baked;
-    sf_backend_dispatch_func dispatch;
     sf_backend_shutdown_func shutdown;
+
+    // Execution
+    void  (*dispatch)(void* state, const struct sf_program* program, struct sf_state* main_state, const struct sf_tensor* domain, const struct sf_task* task);
+    
+    // Synchronization
+    void  (*barrier)(void* state);
+
+    // Metadata
+    const char* (*get_name)(void);
 } sf_backend;
+
+static inline void sf_backend_barrier(sf_backend* backend) {
+    if (backend && backend->barrier) {
+        backend->barrier(backend->state);
+    }
+}
 
 #endif // SF_BACKEND_H

@@ -53,6 +53,12 @@ install(TARGETS base isa
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
+# Export targets for use from the build directory
+export(EXPORT SionFlowSpecTargets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/SionFlowSpecTargets.cmake"
+    NAMESPACE SionFlow::
+)
+
 # Install headers
 install(DIRECTORY base/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY isa/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
