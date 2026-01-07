@@ -1,4 +1,5 @@
 #include <sionflow/base/sf_thread_pool.h>
+#include <sionflow/base/sf_log.h>
 #include <stdlib.h>
 #include <stdbool.h>
 

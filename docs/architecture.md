@@ -9,35 +9,33 @@ The system is built as a layered hierarchy of modules. Lower layers (Base, ISA) 
 ```mermaid
 graph TD
     subgraph App ["Application Layer"]
-        Runner["sf-runner (CLI)"]
-        Window["sf-window (GUI)"]
-        Host["Host (Window/Input/Assets)"]
+        SFC["sfc (Cartridge Compiler)"]
+        Runner["sf-runner (Headless Player)"]
+        Window["sf-window (SDL2 Player)"]
     end
 
     subgraph Core ["Core Orchestration"]
-        Engine["Engine (State/Resources)"]
-        Compiler["Compiler (JSON -> Bin)"]
+        Engine["Engine (State/Strides/Grid)"]
+        Compiler["Compiler (Pass-based Optimizer)"]
     end
 
     subgraph Exec ["Execution Layer"]
-        Backend["Backend (Thread Pool)"]
-        Ops["Ops (Math Kernels)"]
+        Backend["Backend (Parallel Executor)"]
+        Kernels["Kernels (Auto-generated C/Shaders)"]
     end
 
-    subgraph Foundation ["Foundation (Shared)"]
-        ISA["ISA (Bytecode/Tensors)"]
-        Base["Base (Memory/Math/IO)"]
+    subgraph Foundation ["Foundation"]
+        ISA["ISA (Bytecode/Tasks/Bindings)"]
+        Base["Base (Memory/Math/Platform)"]
     end
 
     %% Active Workflow Flow
-    Runner --> Host
-    Window --> Host
-    
-    Host --> Compiler
-    Host --> Engine
+    SFC --> ISA
+    Runner --> Engine
+    Window --> Engine
     
     Engine -.-> Backend
-    Backend --> Ops
+    Backend --> Kernels
 
     %% Style
     style Foundation fill:#eee,stroke:#999,stroke-dasharray: 5 5
@@ -45,184 +43,93 @@ graph TD
 
 ---
 
+## The Execution Model: Task-Driven
+
+Unlike traditional VMs that interpret instructions one-by-one, SionFlow uses a **Task-Driven** model. 
+
+1.  **Instruction:** A simple 4-address operation (Opcode + Register IDs).
+2.  **Task:** A contiguous sequence of instructions that share the same **Execution Domain** (output shape) and **Dispatch Strategy**.
+3.  **Binding:** A link between a Register and its N-Dimensional Strides for a specific task.
+
+### Why Tasks?
+Tasks allow the Engine to perform expensive work (like calculating strides and memory barriers) once per task, rather than for every instruction. For GPU backends, a **Task** maps directly to a **Compute Shader Dispatch**.
+
+---
+
 ## Module Responsibilities
 
 ### 1. Foundation Layers
 
-#### **Base** (`modules/base`)
-*   **Role:** The bedrock. Zero external dependencies.
-*   **Contents:**
-    *   `sf_types.h`: Core typedefs (`f32`, `u8`, `sf_type_info`) and access modes.
-    *   `sf_memory`: Dual-allocator system (Stack Arena + Heap).
-    *   `sf_buffer`: Raw memory container (owns `void* data`).
-    *   `sf_shape`: Shape inference and **Linear Stride Calculation**.
-    *   `sf_math`: Basic scalar math functions.
-    *   `sf_log`: Thread-safe logging subsystem.
-    *   `sf_platform`: OS-independent abstractions (Atomics, Threads, Mutexes).
-    *   `sf_utils`: Common utilities (hashing, path manipulation, file IO).
+#### **Base** (`sf-spec/base`)
+*   **Role:** OS-independent primitives.
+*   **Contents:** Memory allocators (Arena/Heap), Shape math, Thread Pool, and atomic error handling.
 
-#### **ISA** (`modules/isa`)
-*   **Role:** The "Contract" or Interface. Defines the data structures used to communicate between modules. Pure data, no logic.
-*   **Contents:**
-    *   `sf_program`: The compiled bytecode format.
-    *   `sf_instruction`: **STEP_N Layout**. Contains explicit **Linear Strides** for every operand.
-    *   `sf_tensor`: **The View**. A lightweight struct (`info`, `buffer*`, `offset`) pointing to data.
-    *   `sf_state`: Holds registers (tensors) and the **Global Error Pointer**.
+#### **ISA** (`sf-spec/isa`)
+*   **Role:** The Contract. Defines binary formats and metadata.
+*   **Contents:** `sf_program`, `sf_instruction`, `sf_task`, and `sf_op_metadata` (arity, type masks).
 
-#### **Ops** (`modules/ops`)
-*   **Role:** The "Standard Library" of math functions. Stateless kernels implementing instructions.
+### 2. Core Orchestration
 
-### 2. Compilation & Orchestration
+#### **Compiler** (`sf-compiler`)
+*   **Role:** Translates JSON Graphs into optimized Bytecode.
+*   **Passes:** Lowering, Fusion, topological sorting, and **Liveness Analysis** (Register Allocation).
+*   **Safety:** Strictly validates port connections and shape compatibility using metadata.
 
-#### **Compiler** (`modules/compiler`)
-*   **Role:** Translates human-readable Graphs (JSON) into machine-efficient Bytecode (`sf_program`).
-*   **Architecture:** Pipeline of passes:
-    *   **Lowering:** JSON AST -> Flat IR.
-    *   **Inlining:** Recursive expansion of sub-graphs.
-    *   **Optimization (Fusion):** Combines operations (e.g., `Mul + Add -> FMA`).
-    *   **Analysis:** Shape and Type inference/propagation.
-    *   **Register Allocation:** Liveness analysis to minimize memory by reusing registers (**Buffer Aliasing**).
-    *   **Domain Splitting:** Groups instructions into tasks based on output shapes.
-    *   **CodeGen:** Emits binary bytecode and constant data.
-
-#### **Engine** (`modules/engine`)
-*   **Role:** The "Brain" / Orchestrator.
+#### **Engine** (`sf-runtime/engine`)
+*   **Role:** The "Brain" of the Runtime.
 *   **Responsibilities:**
-    *   **Resource Management:** Allocates and manages Global Buffers.
-    *   **Pipeline Management:** Coordinates multiple Kernels and execution order.
-    *   **Double Buffering:** Manages Ping-Pong (Front/Back) state.
+    *   **Resource Management:** Handles Global Buffers and Double-Buffering (Ping-Pong).
+    *   **Stride Baking:** Pre-calculates byte-strides for every register in every task.
+    *   **Dispatching:** Orchestrates the execution sequence and passes prepared "Contexts" to the Backend.
 
-### 3. Application Layer
+### 3. Execution Layer
 
-#### **Host** (`modules/host`)
-*   **Role:** The Interface between Engine and the Outside World (OS, Files, Window).
-*   **Responsibilities:**
-    *   **Application Lifecycle:** Manages `sf_engine` creation, initialization, and shutdown.
-    *   **Manifest Loading:** Parses `.mfapp` files and configures the system. Supports "Raw Graph" loading by synthesizing implicit pipelines.
-    *   **Asset Loading:** Loads external data (Images, Fonts) into Engine resources.
-    *   **Platform Support:**
-        *   `sf_host_headless`: For CLI execution and testing.
-        *   `sf_host_sdl`: For interactive GUI applications.
-    *   **System Resources:** Automated updates for `u_Time`, `u_Resolution`, and `u_Mouse`.
-
-#### **Backend** (`modules/backend_cpu`)
-*   **Role:** The execution engine. Distributes work across CPU threads using a windowed approach.
+#### **Backend** (`sf-backend-cpu`)
+*   **Role:** The "Muscle". Implements the actual math.
+*   **Architecture:** A "Pure Executor" that receives a list of tasks and a pre-filled `sf_exec_ctx`. It has no knowledge of graph logic or resource names.
 
 ---
 
-## Memory Safety & Error Handling
+## Memory Model: Storage vs. View
 
-SionFlow priorities visibility and fault isolation through two defensive layers:
+SionFlow distinguishes between raw data and how it is interpreted.
 
-1.  **Atomic Kill Switch:** The `sf_engine` maintains an atomic error code. If any thread fails, it sets the global flag, stopping all other threads and kernels immediately.
-2.  **Kernel Crash Reports:** Detailed reports on failure including **Opcode Names**, register IDs, domain coordinates, and memory ranges.
+1.  **sf_buffer (Storage):** A raw block of memory. Owned by the Engine.
+2.  **sf_tensor (View):** Metadata (Shape, DType, Offset) + Pointer to a buffer. 
+3.  **Registers:** Tensors stored in the `sf_state`. The Compiler optimizes memory usage by aliasing registers (reusing buffers for different tensors with non-overlapping lifetimes).
 
----
-
-## The Pipeline Model
-SionFlow orchestrates execution via a **Pipeline**.
-
-1.  **Kernel:** A compiled Graph (Program). Stateless function $Y = F(X)$.
-2.  **Resource:** A named Global Buffer managed by the Engine.
-3.  **Binding:** Link between a Kernel Port and a Global Resource.
-4.  **Scheduler:** The Host/Engine executes Kernels sequentially, swapping Front/Back buffers at the end of the frame.
-
-## Data Flow
-
-1.  **Load:** Host loads configuration (Manifest or raw JSON).
-2.  **Initialize:** Host creates Engine, compiles programs, and allocates resources.
-3.  **Loop:**
-    *   Host updates system inputs (Time, Mouse).
-    *   Engine determines active buffers.
-    *   Backend executes kernels in parallel.
-    *   Host presents output (e.g., rendering `out_Color` via SDL).
+### Double Buffering (Ping-Pong)
+For persistent resources (state that survives between frames), the Engine maintains two buffers: **A (Front)** and **B (Back)**.
+*   **Frame N:** Kernels read from **A** and write to **B**.
+*   **Post-Frame:** Engine swaps A and B.
+This ensures that data is never overwritten while being read, enabling stable feedback loops for physics and animations.
 
 ---
 
-## Memory Model
+## Execution Safety & Diagnostics
 
-SionFlow distinguishes between **Storage** and **View**.
+### Atomic Kill Switch
+The `sf_engine` maintains a global atomic error code. Every execution context (`sf_exec_ctx`) holds a pointer to this flag.
+*   **Fault Isolation:** If any thread encounters an error (OOB, Math Error), it sets the global flag.
+*   **Immediate Stop:** All other worker threads check this flag before executing the next instruction and stop immediately if it's set.
 
-1.  **sf_buffer (Storage):**
-    *   A raw allocation of bytes.
-    *   Owned by `sf_engine` (for global resources) or `sf_state` (for temp data).
-    *   Heavyweight (allocation/free).
+### Intrinsic Coordinates (The Index System)
+SionFlow kernels often need to know "where" they are in the execution domain (e.g., pixel X/Y).
+*   **Mechanism:** Special opcodes (`SF_OP_INDEX_X`, etc.) read the current coordinate directly from the `sf_exec_ctx->tile_offset` and `tile_size`.
+*   **Zero-Overhead:** These are treated as "Providers" and do not require actual memory storage during the computation.
 
-2.  **sf_tensor (View):**
-    *   Metadata (`shape`, `dtype`, `strides`) + Pointer to Buffer + Offset.
-    *   Lightweight (created on stack/arena).
-    *   **Zero-Copy Ops:** `Slice`, `Reshape`, and `Transpose` creates a new *View* without touching the *Buffer*.
-
-3.  **Register Allocation (Buffer Aliasing):**
-    *   The compiler performs **Liveness Analysis** to detect when a tensor is no longer needed.
-    *   Registers are reused for non-overlapping lifetimes.
-    *   **In-place Operations:** Element-wise ops (Add, Sub, etc.) can reuse their input register for the output if the input "dies" at that instruction.
-    *   **Persistent Registers:** Inputs, Constants, and Outputs are protected from reuse to maintain interface integrity.
-
-4.  **Execution:**
-    *   The Engine allocates **A** and **B** buffers for every global resource.
-    *   On Frame N: Inputs read from **A**, Outputs write to **B**.
-    *   On Frame N+1: Swap A/B.
-    *   The Backend creates temporary Views into these buffers for each worker thread.
+### Kernel Crash Reports
+When a failure occurs, the backend generates a detailed diagnostic report:
+*   **Location:** Exact line/column in the source JSON.
+*   **Context:** Register values, shapes, and the exact N-Dimensional coordinate where the error happened.
+*   **Opcode Trace:** The specific instruction that triggered the fault.
 
 ---
 
-## Pipeline Manifest (.mfapp)
+## Cartridge Format (.sfc)
 
-The `.mfapp` file is the entry point for applications. It defines the window settings and the computation pipeline.
-
-**Schema (Strict Arrays):**
-
-```json
-{
-    "window": {
-        "title": "My App",
-        "width": 800,
-        "height": 600
-    },
-    "pipeline": {
-        "resources": [
-            { "name": "State", "dtype": "F32", "shape": [1024] },
-            { "name": "Screen", "dtype": "F32", "shape": [800, 600, 4] }
-        ],
-        "kernels": [
-            {
-                "id": "logic",
-                "entry": "logic.json",
-                "bindings": [
-                    { "port": "State", "resource": "State" }
-                ]
-            },
-            {
-                "id": "render",
-                "entry": "render.json",
-                "bindings": [
-                    { "port": "Data", "resource": "State" },
-                    { "port": "Out",  "resource": "Screen" }
-                ]
-            }
-        ]
-    }
-}
-```
-
-## The STEP_N Execution Model
-
-SionFlow uses a generalized **Stride Model** for data processing.
-
-### Linear Strides
-The compiler calculates how pointers advance per domain element:
-*   **Stride 0:** Scalar/Broadcast. Pointer stays static.
-*   **Stride 1:** Flat linear array.
-*   **Stride N:** Multi-channel data (e.g. RGBA).
-
-Kernels perform unconditional pointer arithmetic (`ptr += stride`), eliminating branching in the hot loop.
-
-### Intrinsic Coordinates (Index)
-To know "where" the current thread is running (e.g. pixel coordinate), the graph must use `Input` nodes with specialized **Providers**.
-*   **Mechanism:** These nodes (e.g., `provider: "host.index.0"`) read the current multi-dimensional index from the execution context (`tile_offset`) and output it as a spatial stream.
-*   **Builtin Mapping:** The compiler recognizes `host.index.N` and maps it to `SF_BUILTIN_INDEX` with a specific axis.
-
-### Random Access (Gather)
-Standard operations are linear. For non-linear logic, SionFlow uses `SF_OP_GATHER`.
-*   **Safety:** Explicit bounds checking against the source size. Invalid access triggers the **Kill Switch**.
+A `.sfc` file is a self-contained binary package containing:
+*   **Application IR:** Metadata about window, resources, and inputs.
+*   **Kernels:** Compiled `sf_program` blocks.
+*   **Assets:** Embedded textures, fonts, and data blobs.
+*   **Pipeline:** JSON-description of how kernels are connected.

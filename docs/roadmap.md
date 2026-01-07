@@ -128,3 +128,26 @@
 ### 10.6 Release Engineering
 - [ ] **Semantic Versioning (SemVer):** Implement strict versioning for all components to manage breaking changes in the ISA or binary format.
 - [ ] **Automated Release Pipeline:** Tools to synchronize versions across all four repositories during a release.
+
+---
+
+## Phase 11: GPU Readiness & Execution Model Evolution (Optimization)
+**Goal:** Prepare for high-performance GPU backends (Vulkan/Metal/CUDA) by moving all "intelligence" into the Engine and simplifying the Backend to a "Pure Executor".
+
+### 11.1 Engine Brain Shift (Zero-Overhead Dispatch)
+- [ ] **N-Dimensional Stride Model:** Move from a single "linear stride" to a full `int32_t strides[SF_MAX_DIMS]` array in the execution context.
+- [ ] **Stride Baking:** Pre-calculate all N-D strides during the `Bake` phase or when resources are resized, removing `sf_shape_calc_linear_stride` from the hot dispatch loop.
+- [ ] **Execution Grid Formation (Tiling):** Engine must calculate the N-Dimensional execution grid (e.g. 1920x1080x1) and pass it to the Backend.
+- [ ] **Coordinate-Free Backends:** Remove manual `idx % shape` and `idx / shape` logic from CPU worker jobs. Pass explicit `tile_offset[3]` and `tile_size[3]` from Engine.
+- [ ] **Kernel Argument Baking:** Aggregate all register metadata (Base PTR, Offset, N-D Strides, DType) into a single "Descriptor Set" structure during Bake.
+
+### 11.2 Synchronization & Memory Safety
+- [ ] **Barrier Planning:** Implement an automated Memory Barrier planner in the Engine.
+- [ ] **Dependency Graph:** Engine analyzes task sequences to determine where Read-after-Write (RAW) barriers are needed.
+- [ ] **Abstract Barrier API:** Create `sf_backend_barrier()` to map Engine's sync plan to `VkMemoryBarrier` or `stdatomic_thread_fence`.
+
+### 11.3 GPU-Friendly Kernels
+- [ ] **N-D Indexing in Kernels:** Update all generated and manual kernels to use N-D strides.
+- [ ] **Linear Fast-Path:** If a task is marked as contiguous, Engine should provide a simplified execution context for 1D linear access (vectorized loops).
+- [ ] **Push Constant Optimization:** Identify and group small uniform constants into a dedicated "Constant Block" for efficient GPU access.
+- [ ] **Vulkan Backend Prototype:** Initial implementation of a Compute-based backend using the new Engine-driven architecture.

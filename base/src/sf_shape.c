@@ -122,4 +122,4 @@ i32 sf_shape_calc_linear_stride(size_t op_count, size_t dom_count) {
     if (op_count == 1) return 0;
     if (op_count > dom_count && (op_count % dom_count) == 0) return (i32)(op_count / dom_count);
     return 0;
-}
+}// dev mode test

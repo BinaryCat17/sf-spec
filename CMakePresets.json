@@ -33,5 +33,15 @@
       "architecture": "x64",
       "binaryDir": "$env{SIONFLOW_BUILD_ROOT}/sf-spec/${presetName}"
     }
+  ],
+  "buildPresets": [
+    {
+      "name": "x64-linux",
+      "configurePreset": "x64-linux"
+    },
+    {
+      "name": "x64-windows",
+      "configurePreset": "x64-windows"
+    }
   ]
 }
