@@ -95,16 +95,33 @@ def main():
         sys.exit(0 if success else 1)
 
     # Crawl mode
-    test_files = []
-    for path in Path(args.dir).rglob("*.mfapp"): test_files.append(str(path))
+    all_mfapps = list(Path(args.dir).rglob("*.mfapp"))
+    test_files = [str(p) for p in all_mfapps]
+    
+    # Only add .json files if they are not in a directory containing an .mfapp
+    # and not in a subdirectory of such a directory.
+    mfapp_dirs = [str(p.parent) for p in all_mfapps]
+    
     for path in Path(args.dir).rglob("*.json"):
-        if not any(str(path.parent) in tf for tf in test_files): test_files.append(str(path))
+        path_str = str(path)
+        is_part_of_mfapp = False
+        for md in mfapp_dirs:
+            if path_str.startswith(md):
+                is_part_of_mfapp = True
+                break
+        
+        if not is_part_of_mfapp:
+            test_files.append(path_str)
     
     test_files.sort()
     
     import concurrent.futures
     results = {"pass": 0, "fail": 0}
     failed_details = []
+
+    # Prepare temp directory in build root
+    tmp_dir = os.path.join(args.build_root, "tmp_test") if args.build_root else tempfile.gettempdir()
+    os.makedirs(tmp_dir, exist_ok=True)
 
     # Color support check
     use_color = sys.stdout.isatty() and os.environ.get("TERM") != "dumb" and os.environ.get("NO_COLOR") is None
@@ -116,8 +133,64 @@ def main():
     def task(test_path):
         rel = os.path.relpath(test_path, args.dir)
         is_neg = "negative" in test_path or os.path.basename(test_path).startswith("fail_")
-        ok, msg = run_single_test(sfc, runner, test_path, is_neg, args.timeout)
-        return rel, ok, msg
+        
+        # We need a unique temp file for each parallel task
+        fd, sfc_path = tempfile.mkstemp(suffix=".sfc", dir=tmp_dir)
+        os.close(fd)
+
+        try:
+            ok, msg = run_single_test_custom(sfc, runner, test_path, sfc_path, is_neg, args.timeout)
+            return rel, ok, msg
+        finally:
+            if os.path.exists(sfc_path): os.remove(sfc_path)
+
+    # Refactor run_single_test to accept sfc_path
+    def run_single_test_custom(sfc, runner, input_path, sfc_path, expect_fail=False, timeout=5):
+        frames = 1
+        expectations = {}
+        if input_path.endswith(".mfapp"):
+            try:
+                with open(input_path, 'r') as f:
+                    config = json.load(f)
+                    test_cfg = config.get("test", {})
+                    frames = test_cfg.get("frames", 1)
+                    expectations = test_cfg.get("expectations", {})
+            except: pass
+
+        cmd_compile = [sfc, input_path, sfc_path]
+        cmd_run = [runner, sfc_path, "--headless", "--frames", str(frames)]
+
+        try:
+            # 1. Compile
+            ret = subprocess.run(cmd_compile, capture_output=True, text=True, timeout=timeout)
+            if ret.returncode != 0:
+                return (expect_fail, f"Compilation Failed\nCommand: {' '.join(cmd_compile)}\n\n{ret.stdout}{ret.stderr}")
+            
+            # 2. Run
+            try:
+                ret = subprocess.run(cmd_run, capture_output=True, text=True, timeout=timeout)
+                if ret.returncode != 0:
+                    return (expect_fail, f"Runtime Failed (Exit {ret.returncode})\nCommand: {' '.join(cmd_run)}\n\n{ret.stdout}{ret.stderr}")
+            except subprocess.TimeoutExpired as e:
+                out = (e.stdout.decode() if e.stdout else "") + (e.stderr.decode() if e.stderr else "")
+                return (False, f"Runtime Timed Out after {timeout}s\nCommand: {' '.join(cmd_run)}\n\nPartial Output:\n{out}")
+            
+            if expect_fail:
+                return (False, "Test was expected to fail but succeeded.")
+
+            # 3. Verify
+            if expectations:
+                actual = parse_output_values(ret.stdout)
+                for name, expected_vals in expectations.items():
+                    if name not in actual: return (False, f"Resource '{name}' not found")
+                    if len(actual[name]) != len(expected_vals): return (False, f"Size mismatch for {name}")
+                    for i in range(len(expected_vals)):
+                        if abs(actual[name][i] - expected_vals[i]) > 0.001:
+                            return (False, f"Value mismatch at {name}[{i}]: expected {expected_vals[i]}, got {actual[name][i]}")
+            
+            return (True, "Passed")
+        except subprocess.TimeoutExpired:
+            return (False, f"Compilation Timed Out\nCommand: {' '.join(cmd_compile)}")
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(task, tf) for tf in test_files]

@@ -100,8 +100,8 @@ void sf_shape_format(const sf_type_info* info, char* buf, size_t size) {
 }
 
 bool sf_shape_broadcast(const sf_type_info* a, const sf_type_info* b, sf_type_info* out) {
-    if (sf_shape_is_scalar(a)) { *out = *b; return true; }
-    if (sf_shape_is_scalar(b)) { *out = *a; return true; }
+    if (a->ndim == 0) { *out = *b; return true; }
+    if (b->ndim == 0) { *out = *a; return true; }
     
     int ndim_a = (int)a->ndim;
     int ndim_b = (int)b->ndim;

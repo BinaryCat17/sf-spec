@@ -151,7 +151,11 @@
       },
       {
         "id": "scalar",
-        "summary": "Scalar output"
+        "summary": "Output is rank-0 scalar"
+      },
+      {
+        "id": "range",
+        "summary": "1D sequence of length 'count'"
       }
     ],
     "access_patterns": [
@@ -227,7 +231,8 @@
     "RESHAPE": 522,
     "INDEX_X": 530,
     "INDEX_Y": 531,
-    "INDEX_Z": 532
+    "INDEX_Z": 532,
+    "RANGE": 533
   },
   "nodes": [
     {
@@ -257,7 +262,7 @@
       "category": "special",
       "access": "linear",
       "type_rule": "same_as_input",
-      "shape_rule": "special",
+      "shape_rule": "same_as_s1",
       "inputs": [
         {
           "name": "in",
@@ -296,7 +301,7 @@
       "opcode": "INDEX_X",
       "category": "special",
       "access": "special",
-      "type_rule": "force_f32",
+      "type_rule": "same_as_input",
       "shape_rule": "special",
       "flags": ["GENERATOR", "SPATIAL"],
       "inputs": []
@@ -307,7 +312,7 @@
       "opcode": "INDEX_Y",
       "category": "special",
       "access": "special",
-      "type_rule": "force_f32",
+      "type_rule": "same_as_input",
       "shape_rule": "special",
       "flags": ["GENERATOR", "SPATIAL"],
       "inputs": []
@@ -318,10 +323,26 @@
       "opcode": "INDEX_Z",
       "category": "special",
       "access": "special",
-      "type_rule": "force_f32",
+      "type_rule": "same_as_input",
       "shape_rule": "special",
       "flags": ["GENERATOR", "SPATIAL"],
       "inputs": []
+    },
+    {
+      "id": "RANGE",
+      "name": "Range",
+      "opcode": "RANGE",
+      "category": "special",
+      "access": "special",
+      "type_rule": "same_as_input",
+      "shape_rule": "range",
+      "flags": ["GENERATOR", "FORCE_DOM"],
+      "inputs": [
+        {
+          "name": "count",
+          "mask": "all"
+        }
+      ]
     },
     {
       "id": "ADD",

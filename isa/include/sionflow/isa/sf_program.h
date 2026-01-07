@@ -72,14 +72,12 @@ typedef struct {
 // Map Name -> Register Index
 typedef struct {
     char name[SF_MAX_SYMBOL_NAME];
-    char provider[SF_MAX_SYMBOL_NAME];
     uint32_t name_hash; // FNV-1a
     uint32_t register_idx;
     uint32_t related_name_hash; // Hash of the Input symbol that drives this Output's shape (0 if none)
     uint8_t flags;       // SF_SYMBOL_FLAG_* | SF_RESOURCE_FLAG_*
     uint16_t builtin_id; // sf_builtin_id
-    uint8_t builtin_axis; // For indexed providers like host.index.N
-    uint8_t reserved[1];
+    uint8_t reserved[5];
 } sf_bin_symbol;
 
 // Binding between a register and a task's domain

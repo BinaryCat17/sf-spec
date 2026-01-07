@@ -183,6 +183,8 @@ void sf_log_message(sf_log_level level, const char* file, int line, const char* 
 
     // 3. Fatal error handling
     if (level == SF_LOG_LEVEL_FATAL) {
-        abort();
+        sf_mutex_unlock(&g_logger.mutex);
+        sf_log_shutdown();
+        exit(1);
     }
 }
