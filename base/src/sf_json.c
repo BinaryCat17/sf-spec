@@ -146,6 +146,16 @@ static void advance(sf_parser* p) {
     p->peek = next_token(&p->lexer);
 }
 
+static void report_error(sf_parser* p, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    fprintf(stderr, "JSON Parse Error at %u:%u: ", p->peek.loc.line, p->peek.loc.column);
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+    va_end(args);
+    p->failed = true;
+}
+
 static sf_json_value* parse_value(sf_parser* p);
 
 static sf_json_value* parse_object(sf_parser* p) {
@@ -168,8 +178,7 @@ static sf_json_value* parse_object(sf_parser* p) {
 
     while (p->peek.type != TOK_RBRACE && p->peek.type != TOK_EOF && !p->failed) {
         if (p->peek.type != TOK_STRING) {
-            SF_LOG_ERROR("Expected string key at %u:%u", p->peek.loc.line, p->peek.loc.column);
-            p->failed = true;
+            report_error(p, "Expected string key, got token type %d", p->peek.type);
             return NULL;
         }
         
@@ -179,8 +188,7 @@ static sf_json_value* parse_object(sf_parser* p) {
         advance(p);
         
         if (p->peek.type != TOK_COLON) {
-            SF_LOG_ERROR("Expected ':' after key at %u:%u", p->peek.loc.line, p->peek.loc.column);
-            p->failed = true;
+            report_error(p, "Expected ':' after key '%s'", key);
             return NULL;
         }
         advance(p);
@@ -200,14 +208,12 @@ static sf_json_value* parse_object(sf_parser* p) {
         if (p->peek.type == TOK_COMMA) {
             advance(p);
             if (p->peek.type == TOK_RBRACE) {
-                SF_LOG_ERROR("Trailing comma in object at %u:%u", p->peek.loc.line, p->peek.loc.column);
-                p->failed = true;
+                report_error(p, "Trailing comma in object");
                 return NULL;
             }
         }
         else if (p->peek.type != TOK_RBRACE) {
-            SF_LOG_ERROR("Expected ',' or '}' at %u:%u", p->peek.loc.line, p->peek.loc.column);
-            p->failed = true;
+            report_error(p, "Expected ',' or '}' after value");
             break;
         }
     }
@@ -261,14 +267,12 @@ static sf_json_value* parse_array(sf_parser* p) {
         if (p->peek.type == TOK_COMMA) {
             advance(p);
             if (p->peek.type == TOK_RBRACKET) {
-                SF_LOG_ERROR("Trailing comma in array at %u:%u", p->peek.loc.line, p->peek.loc.column);
-                p->failed = true;
+                report_error(p, "Trailing comma in array");
                 return NULL;
             }
         }
         else if (p->peek.type != TOK_RBRACKET) {
-            SF_LOG_ERROR("Expected ',' or ']' at %u:%u", p->peek.loc.line, p->peek.loc.column);
-            p->failed = true;
+            report_error(p, "Expected ',' or ']' after array item");
             break;
         }
     }
@@ -335,7 +339,7 @@ static sf_json_value* parse_value(sf_parser* p) {
             advance(p);
             return v;
         default:
-            SF_LOG_ERROR("Unexpected token at %u:%u", p->peek.loc.line, p->peek.loc.column);
+            report_error(p, "Unexpected token type %d", p->peek.type);
             advance(p);
             return NULL;
     }
@@ -360,15 +364,27 @@ const char* sf_json_get_string(const sf_json_value* val) {
 
 sf_json_value* sf_json_parse(const char* json_str, sf_arena* arena) {
     sf_parser p;
+    memset(&p, 0, sizeof(sf_parser)); // Zero out the parser structure
     lex_init(&p.lexer, json_str);
     p.arena = arena;
+    p.failed = false;
     advance(&p);
-    return parse_value(&p);
+    sf_json_value* val = parse_value(&p);
+    if (p.failed) return NULL;
+    return val;
 }
 
 sf_ast_graph* sf_json_parse_graph(const char* json_str, sf_arena* arena) {
+    fprintf(stderr, "DEBUG: sf_json_parse_graph called, input len: %zu\n", strlen(json_str));
     sf_json_value* root_val = sf_json_parse(json_str, arena);
-    if (!root_val || root_val->type != SF_JSON_VAL_OBJECT) return NULL;
+    if (!root_val) {
+        fprintf(stderr, "DEBUG: root_val is NULL\n");
+        return NULL;
+    }
+    if (root_val->type != SF_JSON_VAL_OBJECT) {
+        fprintf(stderr, "DEBUG: root_val is NOT an object (type: %d)\n", root_val->type);
+        return NULL;
+    }
     
     sf_ast_graph* graph = SF_ARENA_PUSH(arena, sf_ast_graph, 1);
     memset(graph, 0, sizeof(sf_ast_graph));

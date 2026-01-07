@@ -196,6 +196,7 @@
     "SQRT": 25,
     "POW": 26,
     "SUM": 27,
+    "SUM_STABLE": 28,
     "FMA": 29,
     "MATMUL": 40,
     "TRANSPOSE": 41,
@@ -898,9 +899,41 @@
       ]
     },
     {
+      "id": "MEAN_STABLE",
+      "name": "MeanStable",
+      "opcode": "NOOP",
+      "category": "special",
+      "access": "special",
+      "type_rule": "same_as_input",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
       "id": "REDUCE_SUM",
       "name": "ReduceSum",
       "opcode": "SUM",
+      "category": "reduction",
+      "strategy": "reduction",
+      "access": "global",
+      "type_rule": "same_as_input",
+      "shape_rule": "scalar",
+      "flags": ["REDUCER"],
+      "inputs": [
+        {
+          "name": "in",
+          "mask": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "REDUCE_SUM_STABLE",
+      "name": "ReduceSumStable",
+      "opcode": "SUM_STABLE",
       "category": "reduction",
       "strategy": "reduction",
       "access": "global",
