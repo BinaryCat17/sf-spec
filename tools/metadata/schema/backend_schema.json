@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SionFlow Backend Spec Schema",
+  "type": "object",
+  "required": ["backend", "lang", "implementations"],
+  "properties": {
+    "backend": { "type": "string" },
+    "lang": { "type": "string" },
+    "implementations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "expression": { "type": "string" },
+          "template": { "type": "string" }
+        },
+        "anyOf": [
+          { "required": ["expression"] },
+          { "required": ["template"] }
+        ]
+      }
+    }
+  }
+}

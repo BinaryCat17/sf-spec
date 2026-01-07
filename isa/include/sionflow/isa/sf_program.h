@@ -128,8 +128,9 @@ typedef struct {
     
     u32 reduction_scratch_size; // Elements needed for reductions
     u32 sync_scratch_size;      // Elements needed for sync operations
+    u32 push_constants_size;    // Size in bytes of the grouped scalar constants
     
-    u32 reserved[8];       
+    u32 reserved[7];       
 } sf_bin_header;
 
 // In-memory representation of a single program
@@ -147,6 +148,8 @@ typedef struct sf_program {
     sf_bin_symbol* symbols;
     sf_task* tasks;
     sf_bin_task_binding* bindings;
+
+    void* push_constants_data; // Pointer to the contiguous block of scalar constants
 } sf_program;
 
 #endif // SF_PROGRAM_H

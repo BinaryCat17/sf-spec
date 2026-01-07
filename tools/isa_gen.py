@@ -4,6 +4,19 @@ import sys
 import argparse
 from jinja2 import Environment, FileSystemLoader
 
+def validate_json(data, schema_path):
+    try:
+        import jsonschema
+        with open(schema_path, "r") as f:
+            schema = json.load(f)
+        jsonschema.validate(instance=data, schema=schema)
+    except ImportError:
+        print(f"Warning: jsonschema not found. Skipping validation for {schema_path}")
+    except Exception as e:
+        print(f"Error: Validation failed for {schema_path}")
+        print(f"Details: {str(e)}")
+        sys.exit(1)
+
 def main():
     parser = argparse.ArgumentParser(description="SionFlow ISA Code Generator")
     parser.add_argument("--isa", required=True, help="Path to isa.json")
@@ -14,21 +27,27 @@ def main():
     
     args = parser.parse_args()
     
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    schema_dir = os.path.join(script_dir, "metadata", "schema")
+
     # 1. Load ISA
     with open(args.isa, "r") as f:
         isa_data = json.load(f)
+    validate_json(isa_data, os.path.join(schema_dir, "isa_schema.json"))
         
     # 2. Load Backend (Optional)
     backend_data = {}
     if args.backend:
         with open(args.backend, "r") as f:
             backend_data = json.load(f)
+        validate_json(backend_data, os.path.join(schema_dir, "backend_schema.json"))
 
     # 3. Load Compiler (Optional)
     compiler_data = {}
     if args.compiler:
         with open(args.compiler, "r") as f:
             compiler_data = json.load(f)
+        validate_json(compiler_data, os.path.join(schema_dir, "compiler_schema.json"))
 
     # 4. Load Manifest (Optional)
     manifest_data = {}

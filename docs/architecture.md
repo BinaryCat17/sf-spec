@@ -83,10 +83,29 @@ Tasks allow the Engine to perform expensive work (like calculating strides and m
     *   **Dispatching:** Orchestrates the execution sequence and passes prepared "Contexts" to the Backend.
 
 ### 3. Execution Layer
+...
+(already described)
 
-#### **Backend** (`sf-backend-cpu`)
-*   **Role:** The "Muscle". Implements the actual math.
-*   **Architecture:** A "Pure Executor" that receives a list of tasks and a pre-filled `sf_exec_ctx`. It has no knowledge of graph logic or resource names.
+---
+
+## Build System & Automation
+
+SionFlow uses a modern CMake + vcpkg infrastructure designed for fast iteration and architectural integrity.
+
+### Automated Code Generation
+The system implements a **Spec-First** approach. Core definitions (opcodes, dtypes, fusion rules) are stored as JSON metadata.
+*   **Tooling:** `isa_gen.py` (Jinja2-based) transforms metadata into C code.
+*   **Integration:** Code generation is part of the CMake build graph (`add_custom_command`). Modifying `isa.json` triggers a cascade of updates:
+    1.  `sf-spec` regenerates headers and opcode tables.
+    2.  `sf-compiler` regenerates fusion rules and pipeline manifests.
+    3.  `sf-backend-cpu` regenerates math kernels.
+*   **Shadow Builds:** All generated files are placed in `${CMAKE_CURRENT_BINARY_DIR}`, keeping the source tree clean.
+
+### Workspace Orchestration
+While each module is a self-contained CMake project, they can be unified using the `SF_WORKSPACE` flag.
+*   **Direct Linking:** Modules communicate via exported CMake targets (`SionFlow::base`, etc.).
+*   **Resource Export:** `sf-spec` exports paths to its metadata and scripts, allowing sibling modules to reference them without fragile relative paths.
+*   **Vcpkg Features:** External dependencies like SDL2/STB are encapsulated in the `full` feature of `sf-spec`, keeping the core specification library dependency-free for light installations.
 
 ---
 

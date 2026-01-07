@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SionFlow ISA Schema",
+  "type": "object",
+  "required": ["isa", "dtypes", "type_masks", "constants", "opcodes", "nodes"],
+  "properties": {
+    "isa": {
+      "type": "object",
+      "required": ["name", "version", "target_revision"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "target_revision": { "type": "integer" }
+      }
+    },
+    "dtypes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "size", "kind"],
+        "properties": {
+          "id": { "type": "integer" },
+          "size": { "type": "integer" },
+          "kind": { "type": "string", "enum": ["float", "integer", "unsigned"] }
+        }
+      }
+    },
+    "type_masks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    "constants": {
+      "type": "object",
+      "required": ["categories", "strategies", "type_rules", "shape_rules"],
+      "properties": {
+        "categories": { "type": "array", "items": { "$ref": "#/definitions/const_item" } },
+        "strategies": { "type": "array", "items": { "$ref": "#/definitions/const_item" } },
+        "type_rules": { "type": "array", "items": { "$ref": "#/definitions/const_item" } },
+        "shape_rules": { "type": "array", "items": { "$ref": "#/definitions/const_item" } }
+      }
+    },
+    "opcodes": {
+      "type": "object",
+      "additionalProperties": { "type": "integer" }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "opcode", "category"],
+        "properties": {
+          "id": { "type": "string" },
+          "opcode": { "type": "string" },
+          "category": { "type": "string" },
+          "strategy": { "type": "string" },
+          "type_rule": { "type": "string" },
+          "shape_rule": { "type": "string" },
+          "summary": { "type": "string" },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "mask"],
+              "properties": {
+                "name": { "type": "string" },
+                "mask": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "const_item": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "summary": { "type": "string" }
+      }
+    }
+  }
+}

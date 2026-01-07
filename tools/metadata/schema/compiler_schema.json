@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SionFlow Compiler Spec Schema",
+  "type": "object",
+  "required": ["compiler", "pipeline", "fusion_rules"],
+  "properties": {
+    "compiler": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "pipeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "func"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "func": { "type": "string" }
+        }
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "fusion_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "target", "patterns", "replace_with"],
+        "properties": {
+          "id": { "type": "string" },
+          "summary": { "type": "string" },
+          "target": { "type": "string" },
+          "patterns": { "type": "array" },
+          "replace_with": { "type": "string" }
+        }
+      }
+    },
+    "lowering_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "target", "replace_with_subgraph", "output"],
+        "properties": {
+          "id": { "type": "string" },
+          "target": { "type": "string" },
+          "replace_with_subgraph": { "type": "array" },
+          "output": { "type": "string" }
+        }
+      }
+    },
+    "node_constraints": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "min_rank": { "type": "integer" },
+          "flags": { "type": "array", "items": { "type": "string" } },
+          "assertions": { "type": "array" }
+        }
+      }
+    }
+  }
+}

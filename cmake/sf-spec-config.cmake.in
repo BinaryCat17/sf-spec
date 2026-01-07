@@ -8,4 +8,9 @@ find_dependency(Threads)
 # Include the targets
 include("${CMAKE_CURRENT_LIST_DIR}/SionFlowSpecTargets.cmake")
 
+set(SF_ISA_METADATA "@SF_ISA_METADATA@")
+set(SF_MANIFEST_METADATA "@SF_MANIFEST_METADATA@")
+set(SF_ISA_GEN_SCRIPT "@SF_ISA_GEN_SCRIPT@")
+set(SF_ISA_TEMPLATES "@SF_ISA_TEMPLATES@")
+
 check_required_components(sf-spec)

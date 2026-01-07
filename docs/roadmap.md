@@ -122,16 +122,17 @@
 - [x] **Stride Baking:** Pre-calculate all N-D strides during the `Bake` phase or when resources are resized.
 - [x] **Execution Grid Formation (Tiling):** Engine must calculate the N-Dimensional execution grid (e.g. 1920x1080x1) and pass it to the Backend.
 - [x] **Linear Access Simplification:** Simplify `cpu_worker_job` by removing manual `idx % shape` logic for 1D tasks.
-- [ ] **Strict Generation Checks:** Integrate JSON Schema validation into `isa_gen.py` to ensure specification integrity.
+- [x] **Strict Generation Checks:** Integrate JSON Schema validation into `isa_gen.py` to ensure specification integrity.
 
 ### 11.2 Synchronization & Memory Safety (Completed)
 - [x] **Barrier Planning:** Implement an automated Memory Barrier planner.
 - [x] **Dependency Graph:** Analyze task sequences to determine where Read-after-Write (RAW) barriers are needed.
-- [ ] **Static Sync Analysis:** Delegate barrier planning to the **Compiler** by introducing `SF_TASK_FLAG_BARRIER` (planned for next session).
+- [x] **Static Sync Analysis:** Delegate barrier planning to the **Compiler** by introducing `SF_TASK_FLAG_BARRIER`.
 - [x] **Abstract Barrier API:** Create `sf_backend_barrier()` to map Engine's sync plan to `VkMemoryBarrier` or `stdatomic_thread_fence`.
 
-### 11.3 GPU-Friendly Kernels (Architecture Ready)
+### 11.3 GPU-Friendly Kernels (Completed)
 - [x] **N-D Indexing in Kernels:** Update all generated and manual kernels to use N-D strides.
 - [x] **Task Specialization (Fast Path):** Use SIMD/memcpy for contiguous tasks without stride overhead.
-- [ ] **DSL-Enhanced Kernels:** Implement a simplified DSL within Jinja2 templates for complex math (e.g. DOT, MATMUL).
-- [ ] **Push Constant Optimization:** Identify and group small uniform constants into a dedicated "Constant Block".
+- [x] **DSL-Enhanced Kernels:** Implement a simplified DSL within Jinja2 templates for complex math (e.g. DOT, MATMUL) and unify it with N-D indexing for cross-backend portability.
+- [x] **Push Constant Optimization:** Group small uniform constants (rank-0 tensors with SF_TENSOR_FLAG_CONSTANT) into a dedicated "Constant Block" to minimize binding overhead.
+

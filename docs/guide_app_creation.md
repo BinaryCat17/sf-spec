@@ -29,7 +29,8 @@ Logic in SionFlow is defined as a directed acyclic graph (DAG). Each node repres
 ```
 
 ### Key Rules:
-*   **Input Ports:** Use standard names like `a`, `b`, `c`, `x`, `in`. Refer to `isa.json` for specific opcode ports.
+*   **Input Ports:** Use standard names like `a`, `b`, `c`, `x`, `in`. Refer to `sf-spec/tools/metadata/isa.json` for the exact port names and arity of each opcode.
+*   **Formatting:** You can use `sf-spec/tools/format_json.py` to ensure your JSON files follow the canonical format.
 *   **Output Nodes:** Mark at least one node with `"flags": ["Output"]` or use the dedicated `Output` node type to make data accessible to the host.
 *   **DTypes:** By default, nodes use `F32`. You can specify `"dtype": "I32"` or `"U8"` for integer/mask operations.
 
@@ -76,6 +77,7 @@ Use the `sfc` tool to bake everything into a single binary file. This step perfo
 
 ```bash
 # Compile the manifest and all referenced JSONs into a .sfc cartridge
+# If not in PATH, find 'sfc' in your workspace build directory (sf-compiler/sfc/sfc)
 sfc app.mfapp my_app.sfc
 ```
 

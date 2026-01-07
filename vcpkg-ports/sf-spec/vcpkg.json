@@ -4,6 +4,10 @@
   "description": "Specification and base libraries for SionFlow",
   "dependencies": [
     {
+      "name": "python3",
+      "host": true
+    },
+    {
       "name": "vcpkg-cmake",
       "host": true
     },

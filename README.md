@@ -33,34 +33,32 @@ SionFlow is composed of several independent but strictly synchronized modules:
 
 ### Build Instructions
 
-SionFlow uses CMake Presets for a unified build experience. Ensure the environment variable `SIONFLOW_BUILD_ROOT` is set to your desired build directory.
+SionFlow uses CMake Presets and vcpkg for a unified build experience.
 
-**Build Sequence:**
-1. `sf-spec`
-2. `sf-compiler`
-3. `sf-backend-cpu`
-4. `sf-runtime`
-5. `sf-samples`
+**1. Workspace Build (Recommended for Developers)**
+This builds all modules (spec, compiler, runtime, backend, samples) in one go using the orchestrator:
+```bash
+python3 sf-spec/tools/build.py --config
+```
 
-**Commands (Example for Linux):**
+**2. Standalone Build (Spec only)**
+If you only need the specification and base libraries:
 ```bash
 cd sf-spec
 cmake --preset x64-linux
 cmake --build --preset x64-linux
 ```
+*Note: In standalone mode, SDL2 and STB dependencies are not required.*
 
 ---
 
-## Development Workflow
+## Tools & Utilities
 
-### Auto-Touch Mechanism
-SionFlow features an automated development workflow. When building `sf-samples` or other dependent modules, the system automatically detects changes in local module source code (e.g., in `sf-spec`) and triggers a rebuild via vcpkg without requiring manual version increments.
-
-**To enable:** Simply use the `x64-linux` or `x64-windows` CMake presets. The `CMAKE_PROJECT_INCLUDE_BEFORE` hook will handle the rest.
-
----
-
-## Tools & Usage
+The `sf-spec/tools` directory contains essential scripts for the ecosystem:
+*   `isa_gen.py`: Core code generator for opcodes and kernels.
+*   `build.py`: Workspace orchestrator.
+*   `format_json.py`: Utility for canonical ISA/Manifest formatting.
+*   `smart_packer.py`: Asset packer for building `.sfc` cartridges.
 
 ### 1. Compile a Cartridge
 Use `sfc` to bake a JSON graph or an `.mfapp` manifest into a binary cartridge:

@@ -1,5 +1,15 @@
 {
   "name": "sf-spec",
-  "version": "0.1.9",
-  "dependencies": []
+  "version": "0.1.18",
+  "dependencies": [
+  ],
+  "features": {
+    "full": {
+      "description": "Dependencies for the entire SionFlow workspace (SDL2, STB)",
+      "dependencies": [
+        "sdl2",
+        "stb"
+      ]
+    }
+  }
 }
