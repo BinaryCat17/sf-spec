@@ -27,6 +27,7 @@ def main():
     parser = argparse.ArgumentParser(description="SionFlow Workspace Build Orchestrator")
     parser.add_argument("--config", action="store_true", help="Force re-configure")
     parser.add_argument("--clean", action="store_true", help="Remove build directory")
+    parser.add_argument("--test", action="store_true", help="Run tests after build")
     args = parser.parse_args()
 
     root = get_root()
@@ -59,9 +60,18 @@ def main():
 
     # Build everything
     ret = run_command(["cmake", "--build", binary_dir], binary_dir)
-    if ret != 0: sys.exit(1)
+    if (ret != 0): sys.exit(1)
 
     print("\nWorkspace Build complete!")
+
+    if args.test:
+        print(f"\n>>> Running SionFlow Tests")
+        ctest_cmd = ["ctest", "--output-on-failure"]
+        ret = run_command(ctest_cmd, binary_dir)
+        if ret != 0:
+            print("\nTests failed!")
+            sys.exit(1)
+        print("\nAll tests passed!")
 
 if __name__ == "__main__":
     main()

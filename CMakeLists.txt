@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 project(sf-spec LANGUAGES C)
 
+enable_testing()
+
+set(SF_SPEC_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "Path to sf-spec root")
+
 # --- Configuration ---
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -95,7 +99,7 @@ install(FILES
 
 # --- Workspace Mode (Delayed) ---
 # We add sibling modules AFTER our targets are defined so they can see them.
-option(SF_WORKSPACE "Build all SionFlow modules as a single project" OFF)
+set(SF_WORKSPACE OFF CACHE BOOL "Build all SionFlow modules as a single project")
 
 if(SF_WORKSPACE)
     message(STATUS "SionFlow: Workspace Mode Enabled")
