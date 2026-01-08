@@ -1,7 +1,6 @@
 #ifndef SF_EXEC_CTX_H
 #define SF_EXEC_CTX_H
 
-#include <sionflow/isa/sf_tensor.h>
 #include <sionflow/isa/sf_program.h>
 #include <sionflow/isa/sf_state.h>
 #include <sionflow/base/sf_memory.h>
@@ -32,7 +31,9 @@ struct sf_exec_ctx {
     // Flat Execution Registry (Zero-Overhead Access)
     void* reg_ptrs[SF_MAX_REGISTERS];               // Base pointers for registers
     int32_t reg_strides[SF_MAX_REGISTERS][SF_MAX_DIMS]; // Pre-calculated N-D byte strides for current task
-    sf_type_info reg_info[SF_MAX_REGISTERS];        // Metadata for registers
+    uint8_t reg_ndims[SF_MAX_REGISTERS];           // Metadata for registers
+    uint8_t reg_dtypes[SF_MAX_REGISTERS];          // Metadata for registers
+    int32_t reg_shapes[SF_MAX_REGISTERS][SF_MAX_DIMS]; // Metadata for registers
     
     // Optional allocator for temporary allocations during execution
     sf_allocator* allocator; 

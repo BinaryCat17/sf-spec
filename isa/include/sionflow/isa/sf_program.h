@@ -83,12 +83,20 @@ typedef struct {
 // Binding between a register and a task's domain
 typedef struct {
     uint16_t reg_idx;
-    uint16_t flags;      // SF_BINDING_FLAG_*
-    uint32_t reserved;
+    uint16_t flags;             // SF_BINDING_FLAG_*
+    uint32_t offset;            // Byte offset (for zero-copy SLICE)
+    int32_t strides[SF_MAX_DIMS]; // Pre-calculated byte strides
 } sf_bin_task_binding;
 
 // Task Flags
 #define SF_TASK_FLAG_BARRIER      (1 << 0)
+
+// Execution Grid for N-Dimensional dispatch
+typedef struct {
+    uint32_t dims[SF_MAX_DIMS];       // Number of tiles in each dimension
+    uint32_t tile_shape[SF_MAX_DIMS];  // Size of each tile
+    uint32_t total_tiles;
+} sf_grid;
 
 // A single execution unit within a program (e.g. for a specific Output shape)
 typedef struct sf_task {
@@ -98,6 +106,8 @@ typedef struct sf_task {
     uint8_t strategy;    // sf_dispatch_strategy
     uint8_t flags;       // SF_TASK_FLAG_*
     uint8_t reserved[2];
+    
+    sf_grid grid;        // Pre-calculated execution grid
     
     uint32_t binding_offset; // Offset into global binding table
     uint32_t binding_count;  // Number of registers used in this task

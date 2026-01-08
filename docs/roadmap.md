@@ -136,3 +136,58 @@
 - [x] **DSL-Enhanced Kernels:** Implement a simplified DSL within Jinja2 templates for complex math (e.g. DOT, MATMUL) and unify it with N-D indexing for cross-backend portability.
 - [x] **Push Constant Optimization:** Group small uniform constants (rank-0 tensors with SF_TENSOR_FLAG_CONSTANT) into a dedicated "Constant Block" to minimize binding overhead.
 
+---
+
+## Phase 12: Architectural Polish & Minimalism (In Progress)
+**Goal:** Добиться предельной чистоты кода и структуры данных. Убрать все лишние сущности, превратив компилятор в "хирурга", а рантайм в "молниеносный плеер".
+
+### 12.1 Radical Simplification (The "No-Copy" Era) (Completed)
+- [x] **Eliminate COPY Node:** Полностью удален `COPY` из ISA и бэкенда. Использовать алиасинг регистров и прошивку связей.
+- [x] **Zero-Copy Views:** Превратить `SLICE` и `RESHAPE` в чисто декларативные операции (метаданные), не выполняющие инструкций в рантайме.
+- [x] **Smart Link Elision:** Пасс `Simplify` автоматически "прошивает" граф насквозь, удаляя всех посредников (`INPUT`, `OUTPUT`, `CALL`, `COPY`).
+- [x] **Total Register Aliasing:** Внедрено в `sf_pass_liveness`, мостики используют регистры источников.
+
+### 12.2 Static Topology Baking (Shift to Compiler) (Completed)
+- [x] **Compile-Time Strides:** Перенос расчета N-мерных байтовых страйдов из Engine в Compiler. Записываются в `sf_bin_task_binding`.
+- [x] **Static Grid Tiling:** Расчет `sf_grid` (деление на тайлы) перенесен в кодогенератор.
+- [x] **Zero-Overhead Setup:** Engine просто копирует готовые таблицы страйдов и сетку в контекст выполнения.
+
+### 12.3 Runtime Flattening (Completed)
+- [x] **Tensor-less State:** `sf_state` переведен с объектов `sf_tensor` на плоские массивы `reg_data`.
+- [x] **Exec Context Slimming:** Удален из `sf_exec_ctx` массив `reg_info`, метаданные разделены на плоские массивы `ndim/dtype/shape`.
+- [x] **Opaque Resource Views:** `sf_tensor` скрыт внутри ресурсов, ядра работают с чистыми указателями и страйдами.
+
+### 12.4 Metadata-Driven Evolution & Cleanup (In Progress)
+- [ ] **Unused Node Pruning:** Научить `sf_pass_simplify` удалять ветки графа, которые не ведут к активным выходам (`OUTPUT`).
+- [ ] **Symbol Table Compaction:** Удалять неиспользуемые символы и дескрипторы тензоров из финального бинарного файла.
+- [x] **Unified Diagnostic Pipeline:** Интегрирован через метаданные ISA.
+
+### 12.5 Stability & Edge Cases (CRITICAL)
+- [ ] **Rank Normalization Hardening:** Устранить `ndim` mismatch в сложных пайплайнах (тест `test_pipeline.mfapp`).
+- [ ] **View Offset Support:** Реализовать поддержку `offset` в `sf_codegen` и рантайме для полноценного `SLICE` без копирования.
+- [ ] **Ping-Pong Buffer Fix:** Исправить логику обновления `reg_data` для персистентных ресурсов (тест `counter.mfapp`).
+
+## Phase 13: The Meta-Engine (Full Automation)
+**Goal:** Максимальное сокращение ручного Си-кода. SionFlow должен стать "самогенерирующимся" на основе метаданных `isa.json`.
+
+### 13.1 Declarative Shape Inference
+- [x] **Shape Rules in JSON:** Описать правила вывода форм (broadcast, matmul, transpose) прямо в спецификации операций.
+- [x] **CodeGen Analyze:** Сгенерировать `sf_pass_analyze.c`, удалив сотни строк ручного сопоставления форм.
+
+### 13.2 Constraint-Based Validation
+- [x] **Op Constraints Metadata:** Добавить в JSON массив проверок для каждого опкода (например, `s1.ndim == s2.ndim`).
+- [x] **Automated Validator:** Превратить `sf_pass_validate.c` в сгенерированный цикл, который автоматически репортит ошибки на основе метаданных.
+
+### 13.3 Unified Serialization (SFC 2.0)
+- [ ] **Binary Layout Spec:** Описать структуру файла `.sfc` в JSON (секции, выравнивание, типы полей).
+- [ ] **Auto-Loader/Saver:** Генерировать функции `sf_program_save` и `sf_program_load` автоматически. Это гарантирует 100% совпадение формата в компиляторе и рантайме.
+
+### 13.4 Advanced Kernel DSL
+- [ ] **N-Dimensional Iterators:** Внедрить в Jinja2 шаблоны для прохода по осям.
+- [ ] **Zero-Manual Kernels:** Перевести `MATMUL`, `DOT` и `NORMALIZE` на полностью сгенерированный код, исключив ошибки ручной индексации.
+
+### 13.5 Structural Refinement (Thin IR)
+- [ ] **Two-Tier IR:** Разделить IR на "тяжелый" (с именами и отладкой) и "тонкий" (только опкоды и регистры).
+- [ ] **Compiler Speedup:** Оптимизаторы должны работать только с "тонким" IR для максимальной скорости и чистоты кода.
+
+

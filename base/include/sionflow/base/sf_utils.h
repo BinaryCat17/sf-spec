@@ -19,6 +19,9 @@ char* sf_arena_sprintf(sf_arena* arena, const char* fmt, ...);
 // Extract directory from path (e.g. "a/b/c.json" -> "a/b")
 char* sf_path_get_dir(const char* path, sf_arena* arena);
 
+// Check if path is absolute
+bool sf_path_is_absolute(const char* path);
+
 // Extract extension from path (e.g. "a.json" -> "json")
 const char* sf_path_get_ext(const char* path);
 

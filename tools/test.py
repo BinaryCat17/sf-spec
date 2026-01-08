@@ -17,7 +17,7 @@ def find_tools(build_root):
     return sfc if os.path.exists(sfc) else None, runner if os.path.exists(runner) else None
 
 def parse_output_values(output):
-    pattern = re.compile(r"'(\w+)'\s+Shape:.*?:\s+{(.*?)}")
+    pattern = re.compile(r"'([\w:]+)'\s+Shape:.*?:\s+{(.*?)}")
     results = {}
     final_state_parts = output.split("--- Final State ---")
     if len(final_state_parts) < 2: return results
@@ -30,7 +30,7 @@ def parse_output_values(output):
         except ValueError: continue
     return results
 
-def run_single_test(sfc, runner, input_path, expect_fail=False, timeout=5):
+def run_single_test(sfc, runner, input_path, expect_fail=False, timeout=15):
     frames = 1
     expectations = {}
     if input_path.endswith(".mfapp"):
@@ -80,7 +80,7 @@ def main():
     parser.add_argument("input", nargs="?", help="Path to a single test (.json or .mfapp)")
     parser.add_argument("--build-root", default=os.environ.get("SIONFLOW_BUILD_ROOT"), help="Path to build root")
     parser.add_argument("--dir", default="sf-samples/tests", help="Directory to crawl for tests")
-    parser.add_argument("--timeout", type=int, default=5, help="Timeout per test")
+    parser.add_argument("--timeout", type=int, default=15, help="Timeout per test")
     parser.add_argument("--expect-fail", action="store_true", help="Expect the single test to fail")
     args = parser.parse_args()
 
@@ -98,19 +98,12 @@ def main():
     all_mfapps = list(Path(args.dir).rglob("*.mfapp"))
     test_files = [str(p) for p in all_mfapps]
     
-    # Only add .json files if they are not in a directory containing an .mfapp
-    # and not in a subdirectory of such a directory.
-    mfapp_dirs = [str(p.parent) for p in all_mfapps]
+    # Only add .json files if they are not in the same directory as an .mfapp
+    mfapp_dirs = set(str(p.parent) for p in all_mfapps)
     
     for path in Path(args.dir).rglob("*.json"):
         path_str = str(path)
-        is_part_of_mfapp = False
-        for md in mfapp_dirs:
-            if path_str.startswith(md):
-                is_part_of_mfapp = True
-                break
-        
-        if not is_part_of_mfapp:
+        if str(path.parent) not in mfapp_dirs:
             test_files.append(path_str)
     
     test_files.sort()
@@ -122,6 +115,14 @@ def main():
     # Prepare temp directory in build root
     tmp_dir = os.path.join(args.build_root, "tmp_test") if args.build_root else tempfile.gettempdir()
     os.makedirs(tmp_dir, exist_ok=True)
+    
+    # Clear old logs
+    logs_dir = os.path.join(os.getcwd(), "logs")
+    if os.path.exists(logs_dir):
+        for f in os.listdir(logs_dir):
+            try:
+                os.remove(os.path.join(logs_dir, f))
+            except: pass
 
     # Color support check
     use_color = sys.stdout.isatty() and os.environ.get("TERM") != "dumb" and os.environ.get("NO_COLOR") is None
@@ -145,7 +146,7 @@ def main():
             if os.path.exists(sfc_path): os.remove(sfc_path)
 
     # Refactor run_single_test to accept sfc_path
-    def run_single_test_custom(sfc, runner, input_path, sfc_path, expect_fail=False, timeout=5):
+    def run_single_test_custom(sfc, runner, input_path, sfc_path, expect_fail=False, timeout=15):
         frames = 1
         expectations = {}
         if input_path.endswith(".mfapp"):

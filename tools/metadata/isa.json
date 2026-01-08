@@ -111,51 +111,63 @@
       },
       {
         "id": "same_as_s1",
-        "summary": "Output shape = s1"
+        "summary": "Output shape = s1",
+        "logic": { "ndim": "p0.ndim", "shape": "p0.shape" }
       },
       {
         "id": "same_as_s2",
-        "summary": "Output shape = s2"
+        "summary": "Output shape = s2",
+        "logic": { "ndim": "p1.ndim", "shape": "p1.shape" }
       },
       {
         "id": "broadcast",
-        "summary": "Broadcast s1, s2, s3"
+        "summary": "Broadcast s1, s2, s3",
+        "logic": { "builtin": "broadcast" }
       },
       {
         "id": "matmul",
-        "summary": "MatMul rule"
+        "summary": "MatMul rule",
+        "logic": { "ndim": 2, "shape": ["p0.shape[p0.ndim-2]", "p1.shape[p1.ndim-1]"] }
       },
       {
         "id": "transpose",
-        "summary": "Transpose rule"
+        "summary": "Transpose rule",
+        "logic": { "ndim": "p0.ndim", "shape": "reverse(p0.shape)" }
       },
       {
         "id": "dot",
-        "summary": "Dot product rule"
+        "summary": "Dot product rule",
+        "logic": { "ndim": "p0.ndim > 0 ? p0.ndim - 1 : 0", "shape": "p0.shape[0:-1]" }
       },
       {
         "id": "join",
-        "summary": "Join rule"
+        "summary": "Join rule",
+        "logic": { "builtin": "join" }
       },
       {
         "id": "gather",
-        "summary": "Gather rule"
+        "summary": "Gather rule",
+        "logic": { "ndim": "p1.ndim", "shape": "p1.shape" }
       },
       {
         "id": "reshape",
-        "summary": "Reshape rule"
+        "summary": "Reshape rule",
+        "logic": { "builtin": "reshape" }
       },
       {
         "id": "slice",
-        "summary": "Slice rule"
+        "summary": "Slice rule",
+        "logic": { "builtin": "slice" }
       },
       {
         "id": "scalar",
-        "summary": "Output is rank-0 scalar"
+        "summary": "Output is rank-0 scalar",
+        "logic": { "ndim": 0 }
       },
       {
         "id": "range",
-        "summary": "1D sequence of length 'count'"
+        "summary": "1D sequence of length 'count'",
+        "logic": { "ndim": 1, "shape": ["p0.const_val"] }
       }
     ],
     "access_patterns": [
@@ -226,9 +238,6 @@
     "GATHER": 262,
     "CUMSUM": 270,
     "COMPRESS": 280,
-    "COPY": 520,
-    "SLICE": 521,
-    "RESHAPE": 522,
     "INDEX_X": 530,
     "INDEX_Y": 531,
     "INDEX_Z": 532,
@@ -258,7 +267,7 @@
     {
       "id": "OUTPUT",
       "name": "Output",
-      "opcode": "COPY",
+      "opcode": "NOOP",
       "category": "special",
       "access": "linear",
       "type_rule": "same_as_input",
@@ -279,21 +288,6 @@
       "type_rule": "same_as_input",
       "shape_rule": "special",
       "inputs": []
-    },
-    {
-      "id": "COPY",
-      "name": "Copy",
-      "opcode": "COPY",
-      "category": "special",
-      "access": "linear",
-      "type_rule": "same_as_input",
-      "shape_rule": "same_as_s1",
-      "inputs": [
-        {
-          "name": "in",
-          "mask": "all"
-        }
-      ]
     },
     {
       "id": "INDEX_X",
@@ -1177,7 +1171,7 @@
     {
       "id": "SLICE",
       "name": "Slice",
-      "opcode": "SLICE",
+      "opcode": "NOOP",
       "category": "memory",
       "access": "linear",
       "type_rule": "same_as_input",
@@ -1196,7 +1190,7 @@
     {
       "id": "RESHAPE",
       "name": "Reshape",
-      "opcode": "RESHAPE",
+      "opcode": "NOOP",
       "category": "memory",
       "access": "linear",
       "type_rule": "same_as_input",

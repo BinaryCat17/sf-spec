@@ -62,6 +62,13 @@ char* sf_path_get_dir(const char* path, sf_arena* arena) {
     return dir;
 }
 
+bool sf_path_is_absolute(const char* path) {
+    if (!path) return false;
+    if (path[0] == '/' || path[0] == '\\') return true;
+    if (strlen(path) > 2 && path[1] == ':' && (path[2] == '/' || path[2] == '\\')) return true;
+    return false;
+}
+
 const char* sf_path_get_ext(const char* path) {
     if (!path) return "";
     const char* dot = strrchr(path, '.');
