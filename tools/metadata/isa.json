@@ -142,7 +142,11 @@
       {
         "id": "join",
         "summary": "Join rule",
-        "logic": { "builtin": "join" }
+        "logic": { 
+          "ndim": "p0.ndim > 0 ? p0.ndim : 1", 
+          "shape": "p0.shape",
+          "last_dim_sum": true 
+        }
       },
       {
         "id": "gather",
@@ -152,12 +156,12 @@
       {
         "id": "reshape",
         "summary": "Reshape rule",
-        "logic": { "builtin": "reshape" }
+        "logic": { "ndim": "p1.shape[0]", "is_reshape": true }
       },
       {
         "id": "slice",
         "summary": "Slice rule",
-        "logic": { "builtin": "slice" }
+        "logic": { "ndim": "p0.ndim", "shape": "p0.shape", "is_slice": true }
       },
       {
         "id": "scalar",
@@ -195,7 +199,7 @@
   },
   "opcodes": {
     "NOOP": 0,
-    "ADD": 1,
+    "ADD": 14,
     "SUB": 2,
     "MUL": 3,
     "DIV": 4,
@@ -414,6 +418,17 @@
           "name": "b",
           "mask": "numeric"
         }
+      ]
+    },
+    {
+      "id": "SQUARE",
+      "name": "Square",
+      "category": "atomic",
+      "access": "linear",
+      "type_rule": "same_as_input",
+      "shape_rule": "same_as_s1",
+      "inputs": [
+        { "name": "in", "mask": "numeric" }
       ]
     },
     {
@@ -1112,22 +1127,10 @@
       "type_rule": "same_as_input",
       "shape_rule": "join",
       "inputs": [
-        {
-          "name": "a",
-          "mask": "all"
-        },
-        {
-          "name": "b",
-          "mask": "all"
-        },
-        {
-          "name": "c",
-          "mask": "all"
-        },
-        {
-          "name": "d",
-          "mask": "all"
-        }
+        { "name": "a", "mask": "all" },
+        { "name": "b", "mask": "all" },
+        { "name": "c", "mask": "all", "optional": true },
+        { "name": "d", "mask": "all", "optional": true }
       ]
     },
     {

@@ -2,6 +2,7 @@ add_library(isa STATIC
     src/sf_tensor.c
     src/sf_exec_ctx.c
     "${SF_GENERATED_DIR}/src/sf_opcodes.c"
+    "${SF_GENERATED_DIR}/src/sf_program_serialization.c"
 )
 add_library(SionFlow::isa ALIAS isa)
 

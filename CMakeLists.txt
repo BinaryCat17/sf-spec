@@ -24,11 +24,13 @@ if(JINJA2_NOT_FOUND)
 endif()
 
 set(SF_ISA_METADATA "${CMAKE_CURRENT_SOURCE_DIR}/tools/metadata/isa.json")
+set(SF_LAYOUT_METADATA "${CMAKE_CURRENT_SOURCE_DIR}/tools/metadata/binary_layout.json")
 set(SF_ISA_GEN_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/tools/isa_gen.py")
 set(SF_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 set(SF_ISA_GENERATED_FILES
     "${SF_GENERATED_DIR}/src/sf_opcodes.c"
+    "${SF_GENERATED_DIR}/src/sf_program_serialization.c"
     "${SF_GENERATED_DIR}/include/sionflow/isa/sf_opcodes.h"
     "${SF_GENERATED_DIR}/include/sionflow/isa/sf_isa_constants.h"
 )
@@ -37,17 +39,21 @@ add_custom_command(
     OUTPUT ${SF_ISA_GENERATED_FILES}
     COMMAND Python3::Interpreter "${SF_ISA_GEN_SCRIPT}"
         --isa "${SF_ISA_METADATA}"
+        --layout "${SF_LAYOUT_METADATA}"
         --render 
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.c.j2:${SF_GENERATED_DIR}/src/sf_opcodes.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.h.j2:${SF_GENERATED_DIR}/include/sionflow/isa/sf_opcodes.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_isa_constants.h.j2:${SF_GENERATED_DIR}/include/sionflow/isa/sf_isa_constants.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_program_serialization.c.j2:${SF_GENERATED_DIR}/src/sf_program_serialization.c"
     DEPENDS 
         "${SF_ISA_METADATA}"
+        "${SF_LAYOUT_METADATA}"
         "${SF_ISA_GEN_SCRIPT}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.c.j2"
         "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_opcodes.h.j2"
         "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_isa_constants.h.j2"
-    COMMENT "Generating ISA source files from metadata..."
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates/sf_program_serialization.c.j2"
+    COMMENT "Generating ISA and Serialization source files from metadata..."
     VERBATIM
 )
 
@@ -59,6 +65,7 @@ add_subdirectory(isa)
 
 # --- Export & Install ---
 set(SF_ISA_METADATA "${CMAKE_CURRENT_SOURCE_DIR}/tools/metadata/isa.json" CACHE INTERNAL "Path to ISA metadata")
+set(SF_LAYOUT_METADATA "${CMAKE_CURRENT_SOURCE_DIR}/tools/metadata/binary_layout.json" CACHE INTERNAL "Path to Binary Layout metadata")
 set(SF_MANIFEST_METADATA "${CMAKE_CURRENT_SOURCE_DIR}/tools/metadata/manifest.json" CACHE INTERNAL "Path to Manifest metadata")
 set(SF_ISA_GEN_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/tools/isa_gen.py" CACHE INTERNAL "Path to ISA generator script")
 set(SF_ISA_TEMPLATES "${CMAKE_CURRENT_SOURCE_DIR}/tools/templates" CACHE INTERNAL "Path to ISA templates")

@@ -3,6 +3,7 @@
 
 #include <sionflow/isa/sf_opcodes.h>
 #include <sionflow/isa/sf_state.h>
+#include <sionflow/isa/sf_tensor.h>
 
 // Forward declarations
 struct sf_exec_ctx;

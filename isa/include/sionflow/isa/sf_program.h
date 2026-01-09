@@ -160,4 +160,33 @@ typedef struct sf_program {
     void* push_constants_data; // Pointer to the contiguous block of scalar constants
 } sf_program;
 
+// --- Serialization (SFC 2.0) ---
+
+typedef struct {
+    const char* name;
+    uint32_t type; // sf_section_type
+    const void* data;
+    uint32_t size;
+} sf_section_desc;
+
+/**
+ * @brief Calculates the total size needed to serialize the program.
+ */
+size_t sf_program_calc_size(const sf_program* prog);
+bool sf_program_save_to_buffer(const sf_program* prog, void* buffer, size_t size);
+bool sf_program_load_from_buffer(sf_program* prog, const void* buffer, size_t size, struct sf_arena* arena);
+
+/**
+ * @brief Calculates total size for a full cartridge.
+ * (Requires app settings from IR, but we can pass them via a simple struct or use defaults)
+ */
+typedef struct {
+    char app_title[SF_MAX_TITLE_NAME];
+    u32 window_width; u32 window_height;
+    u32 num_threads; u8 vsync; u8 fullscreen; u8 resizable;
+} sf_cartridge_params;
+
+size_t sf_cartridge_calc_size(const sf_cartridge_params* params, const sf_section_desc* sections, u32 section_count);
+bool sf_cartridge_save_to_buffer(const sf_cartridge_params* params, const sf_section_desc* sections, u32 section_count, void* buffer, size_t size);
+
 #endif // SF_PROGRAM_H

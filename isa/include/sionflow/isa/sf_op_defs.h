@@ -4,21 +4,10 @@
 #include <sionflow/base/sf_types.h>
 #include <sionflow/isa/sf_isa_constants.h>
 
-typedef enum {
-    SF_ASSERT_NONE = 0,
-    SF_ASSERT_MATCH_DIM,
-    SF_ASSERT_BROADCAST_COMPATIBLE
-} sf_assert_type;
-
-typedef struct {
-    sf_assert_type type;
-    int8_t p0, a0; // Port index and Axis (-1 for last)
-    int8_t p1, a1; // Port index and Axis (-1 for last)
-    const char* msg;
-} sf_op_assert;
-
 /**
  * @brief Unified metadata for an operation.
+ * Focused on Runtime Execution and structural graph properties.
+ * (Validation and Shape Analysis logic is generated into compiler passes).
  */
 typedef struct {
     const char* name;
@@ -27,20 +16,11 @@ typedef struct {
     uint8_t strategy;   // sf_dispatch_strategy
     
     uint32_t input_mask;
-    uint32_t output_mask;
-    
-    uint8_t shape_rule; // sf_shape_rule
-    uint8_t out_rule;   // sf_out_rule
-    uint8_t access;     // sf_access_pattern
+    uint32_t out_rule;   // sf_out_rule
+    uint8_t access;      // sf_access_pattern
     
     const char* ports[4]; 
-    uint8_t arity;
-    int8_t min_rank;
-    int8_t max_rank;
-    uint16_t flags;
-    
-    const sf_op_assert* assertions;
-    uint8_t assertion_count;
+    uint16_t flags;      // SF_OP_FLAG_*
 } sf_op_metadata;
 
 #define SF_OP_FLAG_SPATIAL     (1 << 0)
@@ -54,4 +34,3 @@ typedef struct {
 extern const sf_op_metadata SF_OP_METADATA[];
 
 #endif // SF_OP_DEFS_H
-    

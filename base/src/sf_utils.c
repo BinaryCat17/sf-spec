@@ -62,6 +62,22 @@ char* sf_path_get_dir(const char* path, sf_arena* arena) {
     return dir;
 }
 
+char* sf_path_get_filename_no_ext(const char* path, sf_arena* arena) {
+    if (!path) return NULL;
+    const char* last_slash = strrchr(path, '/');
+#ifdef _WIN32
+    const char* last_bslash = strrchr(path, '\\');
+    if (last_bslash > last_slash) last_slash = last_bslash;
+#endif
+    const char* filename = last_slash ? last_slash + 1 : path;
+    const char* dot = strrchr(filename, '.');
+    size_t len = dot ? (size_t)(dot - filename) : strlen(filename);
+    char* name = SF_ARENA_PUSH(arena, char, len + 1);
+    memcpy(name, filename, len);
+    name[len] = '\0';
+    return name;
+}
+
 bool sf_path_is_absolute(const char* path) {
     if (!path) return false;
     if (path[0] == '/' || path[0] == '\\') return true;

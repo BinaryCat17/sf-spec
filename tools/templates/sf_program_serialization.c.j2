@@ -1,0 +1,260 @@
+#include <sionflow/isa/sf_program.h>
+#include <sionflow/base/sf_log.h>
+#include <sionflow/base/sf_memory.h>
+#include <sionflow/base/sf_shape.h>
+#include <string.h>
+#include <stdlib.h>
+
+/**
+ * SionFlow Program Serialization (Auto-generated SFC 2.0)
+ * Automatically generated from binary_layout.json. DO NOT EDIT.
+ */
+
+// --- Serialization (Save) ---
+
+size_t sf_program_calc_size(const sf_program* prog) {
+    size_t total = 0;
+    {% for item in layout.program_layout %}
+    // Section: {{ item.id }}
+    total = (total + {{ item.alignment|default(1) }} - 1) & ~({{ item.alignment|default(1) }} - 1);
+    {% if item.id == "header" %}
+    total += sizeof(sf_bin_header);
+    {% elif item.count == "variable" %}
+    // Handled manually for now (constant blobs)
+    for (u32 i = 0; i < prog->meta.tensor_count; ++i) {
+        if (prog->tensor_data[i] && (prog->tensor_flags[i] & SF_TENSOR_FLAG_CONSTANT)) {
+             bool is_pc = (prog->push_constants_data && 
+                           (u8*)prog->tensor_data[i] >= (u8*)prog->push_constants_data && 
+                           (u8*)prog->tensor_data[i] < (u8*)prog->push_constants_data + prog->meta.push_constants_size);
+             
+             if (!is_pc) {
+                 size_t sz = sf_shape_calc_count(prog->tensor_infos[i].shape, prog->tensor_infos[i].ndim) * sf_dtype_size(prog->tensor_infos[i].dtype);
+                 total = (total + {{ item.alignment|default(64) }} - 1) & ~({{ item.alignment|default(64) }} - 1);
+                 total += sz;
+             }
+        }
+    }
+    {% else %}
+    total += (size_t)({{ item.count | replace("meta.", "prog->meta.") }}) * sizeof({{ item.type }});
+    {% endif %}
+    {% endfor %}
+    return total;
+}
+
+bool sf_program_save_to_buffer(const sf_program* prog, void* buffer, size_t size) {
+    uint8_t* ptr = (uint8_t*)buffer;
+    uint8_t* start = ptr;
+    (void)size;
+
+    {% for item in layout.program_layout %}
+    // Section: {{ item.id }}
+    ptr = start + ((ptr - start + {{ item.alignment|default(1) }} - 1) & ~({{ item.alignment|default(1) }} - 1));
+    
+    {% if item.id == "header" %}
+    memcpy(ptr, &prog->meta, sizeof(sf_bin_header));
+    ptr += sizeof(sf_bin_header);
+    
+    {% elif item.id == "symbols" %}
+    if (prog->meta.symbol_count > 0) {
+        memcpy(ptr, prog->symbols, prog->meta.symbol_count * sizeof(sf_bin_symbol));
+        ptr += prog->meta.symbol_count * sizeof(sf_bin_symbol);
+    }
+    {% elif item.id == "tasks" %}
+    if (prog->meta.task_count > 0) {
+        memcpy(ptr, prog->tasks, prog->meta.task_count * sizeof(sf_task));
+        ptr += prog->meta.task_count * sizeof(sf_task);
+    }
+    {% elif item.id == "bindings" %}
+    if (prog->meta.binding_count > 0) {
+        memcpy(ptr, prog->bindings, prog->meta.binding_count * sizeof(sf_bin_task_binding));
+        ptr += prog->meta.binding_count * sizeof(sf_bin_task_binding);
+    }
+    {% elif item.id == "tensor_descs" %}
+    for (u32 i = 0; i < prog->meta.tensor_count; ++i) {
+        sf_bin_tensor_desc desc = {0};
+        desc.dtype = (u8)prog->tensor_infos[i].dtype;
+        desc.ndim = prog->tensor_infos[i].ndim;
+        desc.flags = prog->tensor_flags[i];
+        memcpy(desc.shape, prog->tensor_infos[i].shape, sizeof(int32_t) * SF_MAX_DIMS);
+        
+        if (prog->tensor_data[i] && (prog->tensor_flags[i] & SF_TENSOR_FLAG_CONSTANT)) {
+            desc.is_constant = 1;
+            desc.data_size = sf_shape_calc_count(prog->tensor_infos[i].shape, prog->tensor_infos[i].ndim) * sf_dtype_size(prog->tensor_infos[i].dtype);
+        }
+        memcpy(ptr, &desc, sizeof(sf_bin_tensor_desc));
+        ptr += sizeof(sf_bin_tensor_desc);
+    }
+    {% elif item.id == "instructions" %}
+    if (prog->meta.instruction_count > 0) {
+        memcpy(ptr, prog->code, prog->meta.instruction_count * sizeof(sf_instruction));
+        ptr += prog->meta.instruction_count * sizeof(sf_instruction);
+    }
+    {% elif item.id == "push_constants" %}
+    if (prog->meta.push_constants_size > 0) {
+        memcpy(ptr, prog->push_constants_data, prog->meta.push_constants_size);
+        ptr += prog->meta.push_constants_size;
+    }
+    {% elif item.id == "constant_blobs" %}
+    // Handled manually for now (large constant buffers)
+    for (u32 i = 0; i < prog->meta.tensor_count; ++i) {
+        if (prog->tensor_data[i] && (prog->tensor_flags[i] & SF_TENSOR_FLAG_CONSTANT) && !(prog->tensor_flags[i] & SF_TENSOR_FLAG_ALIAS)) {
+             bool is_pc = (prog->push_constants_data && 
+                           (u8*)prog->tensor_data[i] >= (u8*)prog->push_constants_data && 
+                           (u8*)prog->tensor_data[i] < (u8*)prog->push_constants_data + prog->meta.push_constants_size);
+             
+             if (!is_pc) {
+                 size_t sz = sf_shape_calc_count(prog->tensor_infos[i].shape, prog->tensor_infos[i].ndim) * sf_dtype_size(prog->tensor_infos[i].dtype);
+                 ptr = start + ((ptr - start + {{ item.alignment|default(64) }} - 1) & ~({{ item.alignment|default(64) }} - 1));
+                 memcpy(ptr, prog->tensor_data[i], sz);
+                 ptr += sz;
+             }
+        }
+    }
+    {% endif %}
+    {% endfor %}
+
+    return true;
+}
+
+// --- Cartridge Serialization ---
+
+size_t sf_cartridge_calc_size(const sf_cartridge_params* params, const sf_section_desc* sections, u32 section_count) {
+    (void)params;
+    size_t total = sizeof(sf_cartridge_header);
+    for (u32 i = 0; i < section_count; ++i) {
+        total = (total + 63) & ~63;
+        if (sections[i].type == SF_SECTION_PROGRAM) {
+            total += sf_program_calc_size((const sf_program*)sections[i].data);
+        } else {
+            total += sections[i].size;
+        }
+    }
+    return total;
+}
+
+bool sf_cartridge_save_to_buffer(const sf_cartridge_params* params, const sf_section_desc* sections, u32 section_count, void* buffer, size_t size) {
+    uint8_t* start = (uint8_t*)buffer;
+    uint8_t* ptr = start;
+    
+    sf_cartridge_header cart = {0};
+    cart.magic = SF_BINARY_MAGIC;
+    cart.version = SF_BINARY_VERSION;
+    if (params) {
+        strncpy(cart.app_title, params->app_title, SF_MAX_TITLE_NAME - 1);
+        cart.window_width = params->window_width;
+        cart.window_height = params->window_height;
+        cart.num_threads = params->num_threads;
+        cart.vsync = params->vsync;
+        cart.fullscreen = params->fullscreen;
+        cart.resizable = params->resizable;
+    }
+    cart.section_count = section_count;
+
+    ptr += sizeof(sf_cartridge_header);
+    
+    for (u32 i = 0; i < section_count; ++i) {
+        ptr = start + ((ptr - start + 63) & ~63);
+        strncpy(cart.sections[i].name, sections[i].name, SF_MAX_SYMBOL_NAME - 1);
+        cart.sections[i].type = sections[i].type;
+        cart.sections[i].offset = (u32)(ptr - start);
+        
+        if (sections[i].type == SF_SECTION_PROGRAM) {
+            size_t prog_sz = sf_program_calc_size((const sf_program*)sections[i].data);
+            sf_program_save_to_buffer((const sf_program*)sections[i].data, ptr, prog_sz);
+            cart.sections[i].size = (u32)prog_sz;
+            ptr += prog_sz;
+        } else {
+            memcpy(ptr, sections[i].data, sections[i].size);
+            cart.sections[i].size = sections[i].size;
+            ptr += sections[i].size;
+        }
+    }
+    
+    // Copy back the completed header
+    memcpy(start, &cart, sizeof(sf_cartridge_header));
+    return true;
+}
+
+// --- Deserialization (Load) ---
+
+bool sf_program_load_from_buffer(sf_program* prog, const void* buffer, size_t size, sf_arena* arena) {
+    const uint8_t* ptr = (const uint8_t*)buffer;
+    const uint8_t* start = ptr;
+    
+    {% for item in layout.program_layout %}
+    // Section: {{ item.id }}
+    ptr = start + ((ptr - start + {{ item.alignment|default(1) }} - 1) & ~({{ item.alignment|default(1) }} - 1));
+    
+    {% if item.id == "header" %}
+    memcpy(&prog->meta, ptr, sizeof(sf_bin_header));
+    ptr += sizeof(sf_bin_header);
+    
+    // Allocate memory in program structure
+    prog->tensor_infos = SF_ARENA_PUSH(arena, sf_type_info, prog->meta.tensor_count);
+    prog->tensor_data  = SF_ARENA_PUSH(arena, void*, prog->meta.tensor_count);
+    prog->tensor_flags = SF_ARENA_PUSH(arena, uint8_t, prog->meta.tensor_count);
+    memset(prog->tensor_data, 0, sizeof(void*) * prog->meta.tensor_count);
+
+    {% elif item.id == "symbols" %}
+    if (prog->meta.symbol_count > 0) {
+        prog->symbols = SF_ARENA_PUSH(arena, sf_bin_symbol, prog->meta.symbol_count);
+        memcpy(prog->symbols, ptr, prog->meta.symbol_count * sizeof(sf_bin_symbol));
+        ptr += prog->meta.symbol_count * sizeof(sf_bin_symbol);
+    }
+    {% elif item.id == "tasks" %}
+    if (prog->meta.task_count > 0) {
+        prog->tasks = SF_ARENA_PUSH(arena, sf_task, prog->meta.task_count);
+        memcpy(prog->tasks, ptr, prog->meta.task_count * sizeof(sf_task));
+        ptr += prog->meta.task_count * sizeof(sf_task);
+    }
+    {% elif item.id == "bindings" %}
+    if (prog->meta.binding_count > 0) {
+        prog->bindings = SF_ARENA_PUSH(arena, sf_bin_task_binding, prog->meta.binding_count);
+        memcpy(prog->bindings, ptr, prog->meta.binding_count * sizeof(sf_bin_task_binding));
+        ptr += prog->meta.binding_count * sizeof(sf_bin_task_binding);
+    }
+    {% elif item.id == "tensor_descs" %}
+    for (u32 i = 0; i < prog->meta.tensor_count; ++i) {
+        const sf_bin_tensor_desc* desc = (const sf_bin_tensor_desc*)ptr;
+        prog->tensor_infos[i].dtype = desc->dtype;
+        prog->tensor_infos[i].ndim = desc->ndim;
+        prog->tensor_flags[i] = desc->flags;
+        memcpy(prog->tensor_infos[i].shape, desc->shape, sizeof(int32_t) * SF_MAX_DIMS);
+        sf_shape_calc_strides(&prog->tensor_infos[i]);
+        ptr += sizeof(sf_bin_tensor_desc);
+    }
+    {% elif item.id == "instructions" %}
+    if (prog->meta.instruction_count > 0) {
+        prog->code = SF_ARENA_PUSH(arena, sf_instruction, prog->meta.instruction_count);
+        memcpy(prog->code, ptr, prog->meta.instruction_count * sizeof(sf_instruction));
+        ptr += prog->meta.instruction_count * sizeof(sf_instruction);
+    }
+    {% elif item.id == "push_constants" %}
+    if (prog->meta.push_constants_size > 0) {
+        prog->push_constants_data = SF_ARENA_PUSH(arena, uint8_t, prog->meta.push_constants_size);
+        memcpy(prog->push_constants_data, ptr, prog->meta.push_constants_size);
+        
+        // Relink register data for push constants
+        uint32_t pc_offset = 0;
+        for (u32 i = 0; i < prog->meta.tensor_count; ++i) {
+             if ((prog->tensor_flags[i] & SF_TENSOR_FLAG_CONSTANT) && prog->tensor_infos[i].ndim == 0) {
+                 prog->tensor_data[i] = (uint8_t*)prog->push_constants_data + pc_offset;
+                 pc_offset += (uint32_t)sf_dtype_size(prog->tensor_infos[i].dtype);
+             }
+        }
+        ptr += prog->meta.push_constants_size;
+    }
+    {% elif item.id == "constant_blobs" %}
+    for (u32 i = 0; i < prog->meta.tensor_count; ++i) {
+        if ((prog->tensor_flags[i] & SF_TENSOR_FLAG_CONSTANT) && !prog->tensor_data[i]) {
+             size_t sz = sf_shape_calc_count(prog->tensor_infos[i].shape, prog->tensor_infos[i].ndim) * sf_dtype_size(prog->tensor_infos[i].dtype);
+             ptr = start + ((ptr - start + {{ item.alignment|default(64) }} - 1) & ~({{ item.alignment|default(64) }} - 1));
+             prog->tensor_data[i] = (void*)ptr;
+             ptr += sz;
+        }
+    }
+    {% endif %}
+    {% endfor %}
+
+    return true;
+}

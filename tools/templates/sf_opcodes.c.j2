@@ -4,41 +4,20 @@
 #include <stdbool.h>
 
 /**
- * SionFlow Opcode Metadata (Runtime)
+ * SionFlow Operation Metadata (Runtime)
  * Automatically generated from isa.json. DO NOT EDIT.
  */
 
-/**
- * SionFlow Operation Metadata
- * Automatically generated from isa.json and compiler_spec.json. DO NOT EDIT.
- */
-
-{% for node in nodes %}
-{% set constraints = compiler.get('node_constraints', {}).get(node.id, {}) -%}
-{% set assertions = constraints.get('assertions', []) -%}
-{% if assertions %}
-static const sf_op_assert SF_ASSERTIONS_{{ node.id }}[] = {
-    {%- for a in assertions %}
-    { SF_ASSERT_{{ a.type }}, {{ a.p0 | default(0) }}, {{ a.a0 | default(0) }}, {{ a.p1 | default(0) }}, {{ a.a1 | default(0) }}, "{{ a.msg | default('') }}" }{%- if not loop.last %}, {% endif %}
-    {%- endfor %}
-};
-{% endif %}
-{% endfor %}
-
 const sf_op_metadata SF_OP_METADATA[SF_NODE_COUNT] = {
-    [SF_NODE_UNKNOWN] = { "Unknown", 0, SF_OP_CAT_SPECIAL, SF_STRATEGY_DEFAULT, 0, 0, 0, 0, SF_ACCESS_SPECIAL, {NULL, NULL, NULL, NULL}, 0, 0, 0, 0, NULL, 0 },
+    [SF_NODE_UNKNOWN] = { "Unknown", 0, SF_OP_CAT_SPECIAL, SF_STRATEGY_DEFAULT, 0, 0, SF_ACCESS_SPECIAL, {NULL, NULL, NULL, NULL}, 0 },
 {% for node in nodes %}
-{% set constraints = compiler.get('node_constraints', {}).get(node.id, {}) -%}
-{% set assertions = constraints.get('assertions', []) -%}
     [SF_NODE_{{ node.id }}] = {
-        "{{ node.name }}",
-        SF_OP_{{ node.opcode }},
-        SF_OP_CAT_{{ node.category | upper }},
+        "{{ node.name | default(node.id) }}",
+        SF_OP_{{ node.effective_opcode }},
+        SF_OP_CAT_{{ node.category | default('special') | upper }},
         SF_STRATEGY_{{ node.strategy | default('default') | upper }},
-        SF_TYPE_MASK_{{ node.input_mask | default('all') | upper }},
-        SF_TYPE_MASK_{{ node.output_mask | default('all') | upper }},
-        SF_SHAPE_{{ node.shape_rule | upper }},
-        SF_OUT_{{ node.type_rule | upper }},
+        {{ mask_bitfields[node.inputs[0].mask if node.inputs else 'all'] | default(65535) }},
+        SF_OUT_{{ node.type_rule | default('same_as_input') | upper }},
         SF_ACCESS_{{ node.access | default('linear') | upper }},
         {
             {%- for i in range(4) -%}
@@ -46,17 +25,12 @@ const sf_op_metadata SF_OP_METADATA[SF_NODE_COUNT] = {
             {%- if i < 3 -%}, {% endif -%}
             {%- endfor -%}
         },
-        {{ node.inputs|length }},
-        {{ constraints.get('min_rank', -1) }},
-        {{ constraints.get('max_rank', -1) }},
-        {% set cflags = constraints.get('flags', []) -%}
+        {% set cflags = node.get('flags', []) -%}
         {% if cflags -%}
             {%- for f in cflags -%}SF_OP_FLAG_{{ f }}{%- if not loop.last %} | {% endif -%}{%- endfor -%}
         {%- else -%}
             0
-        {%- endif %},
-        {% if assertions %}SF_ASSERTIONS_{{ node.id }}{% else %}NULL{% endif %},
-        {{ assertions | length }}
+        {%- endif %}
     },
 {%- endfor %}
 };
